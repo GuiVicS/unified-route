@@ -17,7 +17,9 @@ import {
   XCircle,
   Store,
   Globe,
-  ArrowLeft
+  ArrowLeft,
+  ShoppingBag,
+  Brain
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -45,11 +47,13 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ConnectionForm } from '@/components/connections/ConnectionForm';
 import { YampiConnectionForm } from '@/components/connections/YampiConnectionForm';
+import { ShopifyConnectionForm } from '@/components/connections/ShopifyConnectionForm';
+import { OpenAIConnectionForm } from '@/components/connections/OpenAIConnectionForm';
 import type { Connection, ConnectionFormData, ProviderType } from '@/types/api-bridge';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-type CreateMode = 'select' | 'yampi' | 'generic';
+type CreateMode = 'select' | 'yampi' | 'shopify' | 'openai' | 'generic';
 
 export function ConnectionsPage() {
   const { 
@@ -125,6 +129,7 @@ export function ConnectionsPage() {
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">Escolha um provedor para começar:</p>
       <div className="grid grid-cols-2 gap-4">
+        {/* Yampi */}
         <Card 
           className="cursor-pointer hover:border-primary transition-colors"
           onClick={() => setCreateMode('yampi')}
@@ -143,6 +148,45 @@ export function ConnectionsPage() {
           </CardContent>
         </Card>
 
+        {/* Shopify */}
+        <Card 
+          className="cursor-pointer hover:border-primary transition-colors"
+          onClick={() => setCreateMode('shopify')}
+        >
+          <CardHeader className="pb-2">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-2">
+              <ShoppingBag className="w-5 h-5 text-white" />
+            </div>
+            <CardTitle className="text-base">Shopify</CardTitle>
+            <CardDescription className="text-xs">
+              Plataforma global de e-commerce
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Badge variant="secondary" className="text-xs">E-commerce</Badge>
+          </CardContent>
+        </Card>
+
+        {/* OpenAI */}
+        <Card 
+          className="cursor-pointer hover:border-primary transition-colors"
+          onClick={() => setCreateMode('openai')}
+        >
+          <CardHeader className="pb-2">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-2">
+              <Brain className="w-5 h-5 text-white" />
+            </div>
+            <CardTitle className="text-base">OpenAI</CardTitle>
+            <CardDescription className="text-xs">
+              GPT, DALL-E, Whisper e mais
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Badge variant="secondary" className="text-xs">AI</Badge>
+          </CardContent>
+        </Card>
+
+        {/* Outros */}
         <Card 
           className="cursor-pointer hover:border-primary transition-colors"
           onClick={() => setCreateMode('generic')}
@@ -151,9 +195,9 @@ export function ConnectionsPage() {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-2">
               <Globe className="w-5 h-5 text-white" />
             </div>
-            <CardTitle className="text-base">Outros Provedores</CardTitle>
+            <CardTitle className="text-base">Outros</CardTitle>
             <CardDescription className="text-xs">
-              OpenAI, Shopify, Dooki ou API genérica
+              Dooki, APIs personalizadas ou genéricas
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -164,6 +208,18 @@ export function ConnectionsPage() {
     </div>
   );
 
+  const renderBackButton = () => (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => setCreateMode('select')}
+      className="mb-2"
+    >
+      <ArrowLeft className="w-4 h-4 mr-2" />
+      Voltar
+    </Button>
+  );
+
   const renderCreateForm = () => {
     if (createMode === 'select') {
       return renderProviderSelector();
@@ -172,31 +228,33 @@ export function ConnectionsPage() {
     if (createMode === 'yampi') {
       return (
         <div className="space-y-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCreateMode('select')}
-            className="mb-2"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar
-          </Button>
+          {renderBackButton()}
           <YampiConnectionForm onSubmit={handleCreate} onCancel={handleCloseCreate} />
+        </div>
+      );
+    }
+
+    if (createMode === 'shopify') {
+      return (
+        <div className="space-y-4">
+          {renderBackButton()}
+          <ShopifyConnectionForm onSubmit={handleCreate} onCancel={handleCloseCreate} />
+        </div>
+      );
+    }
+
+    if (createMode === 'openai') {
+      return (
+        <div className="space-y-4">
+          {renderBackButton()}
+          <OpenAIConnectionForm onSubmit={handleCreate} onCancel={handleCloseCreate} />
         </div>
       );
     }
 
     return (
       <div className="space-y-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setCreateMode('select')}
-          className="mb-2"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar
-        </Button>
+        {renderBackButton()}
         <ConnectionForm onSubmit={handleCreate} onCancel={handleCloseCreate} />
       </div>
     );
@@ -327,11 +385,16 @@ export function ConnectionsPage() {
           <DialogHeader>
             <DialogTitle>
               {createMode === 'select' ? 'Nova Conexão' : 
-               createMode === 'yampi' ? 'Conectar Yampi' : 'Nova Conexão'}
+               createMode === 'yampi' ? 'Conectar Yampi' : 
+               createMode === 'shopify' ? 'Conectar Shopify' :
+               createMode === 'openai' ? 'Conectar OpenAI' :
+               'Nova Conexão'}
             </DialogTitle>
             <DialogDescription>
               {createMode === 'select' ? 'Escolha o tipo de provedor para continuar' :
                createMode === 'yampi' ? 'Configure sua conexão com a plataforma Yampi' :
+               createMode === 'shopify' ? 'Configure sua conexão com a plataforma Shopify' :
+               createMode === 'openai' ? 'Configure sua conexão com a API da OpenAI' :
                'Configure uma nova conexão com provedor de API'}
             </DialogDescription>
           </DialogHeader>
