@@ -12,6 +12,7 @@ import { ConnectionsPage } from "@/pages/ConnectionsPage";
 import { ClientsPage } from "@/pages/ClientsPage";
 import { SecurityPage } from "@/pages/SecurityPage";
 import { LogsPage } from "@/pages/LogsPage";
+import { DocsPage } from "@/pages/DocsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ function AppContent() {
         <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
         <Route path="/security" element={<ProtectedRoute><SecurityPage /></ProtectedRoute>} />
         <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
+        <Route path="/docs" element={<ProtectedRoute><DocsPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
