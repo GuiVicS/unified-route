@@ -572,6 +572,7 @@ sudo journalctl -u apibridge -f`} />
 }
 
 function ProvidersTab() {
+  // === YAMPI ===
   const yampiExample = `// Exemplo de requisição via API Bridge para Yampi
 const response = await fetch('https://seu-apibridge.com/api/proxy', {
   method: 'POST',
@@ -593,6 +594,53 @@ const response = await fetch('https://seu-apibridge.com/api/proxy', {
 
 const data = await response.json();
 console.log(data);`;
+
+  const yampiCurl = `# Listar pedidos da Yampi
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-yampi-001",
+    "method": "GET",
+    "path": "/orders",
+    "query": {
+      "page": "1",
+      "limit": "20",
+      "include": "customer,items"
+    }
+  }'
+
+# Buscar pedido por ID
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-yampi-001",
+    "method": "GET",
+    "path": "/orders/12345"
+  }'
+
+# Listar produtos
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-yampi-001",
+    "method": "GET",
+    "path": "/catalog/products",
+    "query": { "limit": "50" }
+  }'
+
+# Atualizar status do pedido
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-yampi-001",
+    "method": "PUT",
+    "path": "/orders/12345/status",
+    "body": { "status_id": 5 }
+  }'`;
 
   const yampiEndpoints = `# Endpoints Principais da Yampi
 
@@ -620,6 +668,7 @@ GET  /catalog/brands            # Listar marcas
 GET  /checkout/carts            # Listar carrinhos
 GET  /checkout/carts/{id}       # Carrinho por ID`;
 
+  // === SHOPIFY ===
   const shopifyExample = `// Exemplo de requisição via API Bridge para Shopify
 const response = await fetch('https://seu-apibridge.com/api/proxy', {
   method: 'POST',
@@ -640,6 +689,64 @@ const response = await fetch('https://seu-apibridge.com/api/proxy', {
 
 const data = await response.json();
 console.log(data.products);`;
+
+  const shopifyCurl = `# Listar produtos do Shopify
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-shopify-001",
+    "method": "GET",
+    "path": "/products.json",
+    "query": { "limit": "50", "status": "active" }
+  }'
+
+# Buscar pedidos recentes
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-shopify-001",
+    "method": "GET",
+    "path": "/orders.json",
+    "query": { "status": "any", "limit": "25" }
+  }'
+
+# Criar produto
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-shopify-001",
+    "method": "POST",
+    "path": "/products.json",
+    "body": {
+      "product": {
+        "title": "Novo Produto",
+        "body_html": "<strong>Descrição do produto</strong>",
+        "vendor": "Minha Loja",
+        "product_type": "Categoria",
+        "variants": [
+          { "price": "99.00", "sku": "SKU123" }
+        ]
+      }
+    }
+  }'
+
+# Atualizar estoque
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-shopify-001",
+    "method": "POST",
+    "path": "/inventory_levels/set.json",
+    "body": {
+      "inventory_item_id": 123456789,
+      "location_id": 987654321,
+      "available": 100
+    }
+  }'`;
 
   const shopifyEndpoints = `# Endpoints Principais do Shopify
 
@@ -669,6 +776,7 @@ POST /inventory_levels/set.json        # Definir estoque
 GET  /custom_collections.json          # Coleções personalizadas
 GET  /smart_collections.json           # Coleções inteligentes`;
 
+  // === OPENAI ===
   const openaiExample = `// Exemplo de requisição via API Bridge para OpenAI
 const response = await fetch('https://seu-apibridge.com/api/proxy', {
   method: 'POST',
@@ -693,6 +801,79 @@ const response = await fetch('https://seu-apibridge.com/api/proxy', {
 
 const data = await response.json();
 console.log(data.choices[0].message.content);`;
+
+  const openaiCurl = `# Chat Completion com GPT-4
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-openai-001",
+    "method": "POST",
+    "path": "/chat/completions",
+    "body": {
+      "model": "gpt-4",
+      "messages": [
+        { "role": "system", "content": "Você é um assistente útil." },
+        { "role": "user", "content": "Olá, como posso usar a API?" }
+      ],
+      "max_tokens": 500
+    }
+  }'
+
+# Gerar imagem com DALL-E
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-openai-001",
+    "method": "POST",
+    "path": "/images/generations",
+    "body": {
+      "model": "dall-e-3",
+      "prompt": "Um gato programando em um computador",
+      "n": 1,
+      "size": "1024x1024"
+    }
+  }'
+
+# Gerar embeddings
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-openai-001",
+    "method": "POST",
+    "path": "/embeddings",
+    "body": {
+      "model": "text-embedding-3-small",
+      "input": "Texto para gerar embedding"
+    }
+  }'
+
+# Listar modelos disponíveis
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-openai-001",
+    "method": "GET",
+    "path": "/models"
+  }'
+
+# Text-to-Speech
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-openai-001",
+    "method": "POST",
+    "path": "/audio/speech",
+    "body": {
+      "model": "tts-1",
+      "input": "Olá, este é um teste de áudio.",
+      "voice": "alloy"
+    }
+  }'`;
 
   const openaiEndpoints = `# Endpoints Principais da OpenAI
 
@@ -719,6 +900,7 @@ GET  /models/{id}               # Detalhes do modelo
 ## Moderação
 POST /moderations               # Verificar conteúdo`;
 
+  // === GENÉRICO ===
   const genericExample = `// Exemplo de requisição genérica via API Bridge
 const response = await fetch('https://seu-apibridge.com/api/proxy', {
   method: 'POST',
@@ -743,6 +925,68 @@ const response = await fetch('https://seu-apibridge.com/api/proxy', {
     }
   })
 });`;
+
+  const genericCurl = `# Requisição GET genérica
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-minha-api-001",
+    "method": "GET",
+    "path": "/seu/endpoint",
+    "query": { "param1": "valor1" }
+  }'
+
+# Requisição POST com body
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-minha-api-001",
+    "method": "POST",
+    "path": "/criar/recurso",
+    "body": {
+      "nome": "Novo Recurso",
+      "descricao": "Descrição do recurso"
+    }
+  }'
+
+# Requisição PUT para atualizar
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-minha-api-001",
+    "method": "PUT",
+    "path": "/recursos/123",
+    "body": {
+      "nome": "Nome Atualizado"
+    }
+  }'
+
+# Requisição DELETE
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-minha-api-001",
+    "method": "DELETE",
+    "path": "/recursos/123"
+  }'
+
+# Com headers customizados
+curl -X POST 'https://seu-apibridge.com/api/proxy' \\
+  -H 'Content-Type: application/json' \\
+  -H 'X-Client-Token: ab_SeuTokenDeCliente' \\
+  -d '{
+    "connectionId": "conn-minha-api-001",
+    "method": "GET",
+    "path": "/endpoint-especial",
+    "headers": {
+      "X-Custom-Header": "valor-customizado",
+      "Accept-Language": "pt-BR"
+    }
+  }'`;
 
   return (
     <div className="space-y-8">
@@ -837,8 +1081,25 @@ Body:
           </div>
           
           <div>
-            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
-            <CodeBlock code={yampiExample} filename="JavaScript" showLineNumbers />
+            <h4 className="font-medium mb-2">Exemplos de Uso</h4>
+            <Tabs defaultValue="curl" className="w-full">
+              <TabsList className="mb-2">
+                <TabsTrigger value="curl" className="gap-1.5">
+                  <Terminal className="w-3.5 h-3.5" />
+                  cURL
+                </TabsTrigger>
+                <TabsTrigger value="js" className="gap-1.5">
+                  <FileCode className="w-3.5 h-3.5" />
+                  JavaScript
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="curl">
+                <CodeBlock code={yampiCurl} filename="Terminal" />
+              </TabsContent>
+              <TabsContent value="js">
+                <CodeBlock code={yampiExample} filename="JavaScript" showLineNumbers />
+              </TabsContent>
+            </Tabs>
           </div>
           
           <div>
@@ -902,8 +1163,25 @@ Body:
           </div>
           
           <div>
-            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
-            <CodeBlock code={shopifyExample} filename="JavaScript" showLineNumbers />
+            <h4 className="font-medium mb-2">Exemplos de Uso</h4>
+            <Tabs defaultValue="curl" className="w-full">
+              <TabsList className="mb-2">
+                <TabsTrigger value="curl" className="gap-1.5">
+                  <Terminal className="w-3.5 h-3.5" />
+                  cURL
+                </TabsTrigger>
+                <TabsTrigger value="js" className="gap-1.5">
+                  <FileCode className="w-3.5 h-3.5" />
+                  JavaScript
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="curl">
+                <CodeBlock code={shopifyCurl} filename="Terminal" />
+              </TabsContent>
+              <TabsContent value="js">
+                <CodeBlock code={shopifyExample} filename="JavaScript" showLineNumbers />
+              </TabsContent>
+            </Tabs>
           </div>
           
           <div>
@@ -966,8 +1244,25 @@ Body:
           </div>
           
           <div>
-            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
-            <CodeBlock code={openaiExample} filename="JavaScript" showLineNumbers />
+            <h4 className="font-medium mb-2">Exemplos de Uso</h4>
+            <Tabs defaultValue="curl" className="w-full">
+              <TabsList className="mb-2">
+                <TabsTrigger value="curl" className="gap-1.5">
+                  <Terminal className="w-3.5 h-3.5" />
+                  cURL
+                </TabsTrigger>
+                <TabsTrigger value="js" className="gap-1.5">
+                  <FileCode className="w-3.5 h-3.5" />
+                  JavaScript
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="curl">
+                <CodeBlock code={openaiCurl} filename="Terminal" />
+              </TabsContent>
+              <TabsContent value="js">
+                <CodeBlock code={openaiExample} filename="JavaScript" showLineNumbers />
+              </TabsContent>
+            </Tabs>
           </div>
           
           <div>
@@ -1019,8 +1314,25 @@ Body:
           </div>
           
           <div>
-            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
-            <CodeBlock code={genericExample} filename="JavaScript" showLineNumbers />
+            <h4 className="font-medium mb-2">Exemplos de Uso</h4>
+            <Tabs defaultValue="curl" className="w-full">
+              <TabsList className="mb-2">
+                <TabsTrigger value="curl" className="gap-1.5">
+                  <Terminal className="w-3.5 h-3.5" />
+                  cURL
+                </TabsTrigger>
+                <TabsTrigger value="js" className="gap-1.5">
+                  <FileCode className="w-3.5 h-3.5" />
+                  JavaScript
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="curl">
+                <CodeBlock code={genericCurl} filename="Terminal" />
+              </TabsContent>
+              <TabsContent value="js">
+                <CodeBlock code={genericExample} filename="JavaScript" showLineNumbers />
+              </TabsContent>
+            </Tabs>
           </div>
         </CardContent>
       </Card>
