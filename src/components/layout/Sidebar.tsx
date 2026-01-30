@@ -8,7 +8,8 @@ import {
   Shield, 
   FileText,
   LogOut,
-  Zap
+  Zap,
+  BookOpen
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ const navItems = [
   { path: '/clients', label: 'Clientes', icon: Key },
   { path: '/security', label: 'Segurança', icon: Shield },
   { path: '/logs', label: 'Logs de Auditoria', icon: FileText },
+  { path: '/docs', label: 'Documentação', icon: BookOpen },
 ];
 
 export function Sidebar() {
