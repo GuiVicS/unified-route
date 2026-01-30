@@ -5,23 +5,25 @@ import { useConnectionStore } from '@/stores/connectionStore';
 import { useClientStore } from '@/stores/clientStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useAuditStore } from '@/stores/auditStore';
-import { Link2, Key, Activity, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { formatDistanceToNow } from 'date-fns';
+import { Link2, Key, Activity, Clock, Plus, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 function StatCard({ 
   title, 
   value, 
   subtitle, 
   icon: Icon,
-  trend,
+  emptyAction,
 }: { 
   title: string; 
   value: string | number; 
   subtitle?: string; 
   icon: React.ElementType;
-  trend?: { value: number; isPositive: boolean };
+  emptyAction?: { label: string; href: string };
 }) {
+  const isEmpty = value === 0 || value === '0';
+
   return (
     <div className="stat-card">
       <div className="flex items-start justify-between">
@@ -36,14 +38,14 @@ function StatCard({
           <Icon className="w-5 h-5 text-muted-foreground" />
         </div>
       </div>
-      {trend && (
-        <div className="flex items-center gap-1 mt-3">
-          <TrendingUp className={`w-3 h-3 ${trend.isPositive ? 'text-success' : 'text-destructive'}`} />
-          <span className={`text-xs ${trend.isPositive ? 'text-success' : 'text-destructive'}`}>
-            {trend.isPositive ? '+' : ''}{trend.value}%
-          </span>
-          <span className="text-xs text-muted-foreground">vs last week</span>
-        </div>
+      {isEmpty && emptyAction && (
+        <Link 
+          to={emptyAction.href}
+          className="flex items-center gap-1 mt-3 text-xs text-primary hover:underline"
+        >
+          {emptyAction.label}
+          <ArrowRight className="w-3 h-3" />
+        </Link>
       )}
     </div>
   );
@@ -62,9 +64,9 @@ export function DashboardPage() {
     fetchLogs();
   }, []);
 
-  const recentLogs = logs.slice(0, 5);
   const activeConnections = connections.filter(c => c.enabled).length;
   const activeClients = clients.filter(c => c.enabled).length;
+  const hasData = connections.length > 0 || clients.length > 0;
 
   return (
     <AppLayout>
@@ -77,94 +79,115 @@ export function DashboardPage() {
         <StatCard
           title="Connections"
           value={connections.length}
-          subtitle={`${activeConnections} active`}
+          subtitle={connections.length > 0 ? `${activeConnections} active` : undefined}
           icon={Link2}
+          emptyAction={{ label: 'Create first connection', href: '/connections' }}
         />
         <StatCard
           title="Clients"
           value={clients.length}
-          subtitle={`${activeClients} active`}
+          subtitle={clients.length > 0 ? `${activeClients} active` : undefined}
           icon={Key}
+          emptyAction={{ label: 'Create first client', href: '/clients' }}
         />
         <StatCard
           title="Requests Today"
           value={stats.requestsToday.toLocaleString()}
           icon={Activity}
-          trend={{ value: 12, isPositive: true }}
         />
         <StatCard
           title="Avg Latency"
-          value={`${stats.avgLatencyMs}ms`}
-          subtitle={`${stats.errorRate}% error rate`}
+          value={stats.avgLatencyMs > 0 ? `${stats.avgLatencyMs}ms` : '-'}
+          subtitle={stats.errorRate > 0 ? `${stats.errorRate}% error rate` : undefined}
           icon={Clock}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="gradient-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-medium text-foreground mb-4">Active Connections</h2>
-          <div className="space-y-3">
-            {connections.filter(c => c.enabled).slice(0, 4).map(conn => (
-              <div key={conn.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
-                <div className="flex items-center gap-3">
-                  <div className="status-dot status-dot-active" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{conn.name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{conn.baseUrl}</p>
-                  </div>
-                </div>
-                <Badge variant="muted">{conn.providerType}</Badge>
-              </div>
-            ))}
-            {connections.filter(c => c.enabled).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No active connections
-              </p>
-            )}
+      {!hasData ? (
+        <div className="gradient-card border border-border rounded-lg p-8 text-center">
+          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+            <Link2 className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Get Started</h2>
+          <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+            Create your first API connection to start proxying requests securely.
+          </p>
+          <div className="flex justify-center gap-3">
+            <Button asChild>
+              <Link to="/connections">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Connection
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/clients">
+                <Key className="w-4 h-4 mr-2" />
+                Create Client Token
+              </Link>
+            </Button>
           </div>
         </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="gradient-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium text-foreground">Active Connections</h2>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/connections">View all</Link>
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {connections.filter(c => c.enabled).slice(0, 4).map(conn => (
+                <div key={conn.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                  <div className="flex items-center gap-3">
+                    <div className="status-dot status-dot-active" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{conn.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{conn.baseUrl}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{conn.providerType}</span>
+                </div>
+              ))}
+              {connections.filter(c => c.enabled).length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No active connections
+                </p>
+              )}
+            </div>
+          </div>
 
-        <div className="gradient-card border border-border rounded-lg p-6">
-          <h2 className="text-lg font-medium text-foreground mb-4">Recent Requests</h2>
-          <div className="space-y-2">
-            {recentLogs.map(log => (
-              <div key={log.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
-                <div className="flex items-center gap-3">
-                  <Badge 
-                    variant={log.status < 400 ? 'success' : log.status < 500 ? 'warning' : 'destructive'}
-                    className="font-mono text-xs"
-                  >
-                    {log.status}
-                  </Badge>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      <span className="text-muted-foreground">{log.method}</span> {log.path}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{log.connectionName}</p>
+          <div className="gradient-card border border-border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-medium text-foreground">Recent Requests</h2>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/logs">View all</Link>
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {logs.slice(0, 5).map(log => (
+                <div key={log.id} className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-mono px-1.5 py-0.5 rounded ${
+                      log.status < 400 ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
+                    }`}>
+                      {log.status}
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        <span className="text-muted-foreground">{log.method}</span> {log.path}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{log.connectionName}</p>
+                    </div>
                   </div>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(log.timestamp), { addSuffix: true })}
-                </span>
-              </div>
-            ))}
-            {recentLogs.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No recent requests
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {stats.errorRate > 5 && (
-        <div className="mt-6 flex items-center gap-3 p-4 rounded-lg bg-warning/10 border border-warning/20">
-          <AlertTriangle className="w-5 h-5 text-warning" />
-          <div>
-            <p className="text-sm font-medium text-foreground">High Error Rate Detected</p>
-            <p className="text-xs text-muted-foreground">
-              Error rate is at {stats.errorRate}%. Check your connections and logs.
-            </p>
+              ))}
+              {logs.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No requests yet
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}
