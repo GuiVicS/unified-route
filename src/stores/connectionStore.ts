@@ -1,9 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Connection, ConnectionFormData } from '@/types/api-bridge';
+import { schedulSync } from '@/lib/api-service';
+
+// Interface estendida para armazenar credenciais (apenas localmente)
+interface ConnectionWithCredentials extends Connection {
+  apiKey?: string;
+  secret?: string;
+  customAuth?: {
+    headerName: string;
+    headerValueTemplate: string;
+  };
+}
 
 interface ConnectionStore {
-  connections: Connection[];
+  connections: ConnectionWithCredentials[];
   isLoading: boolean;
   error: string | null;
   fetchConnections: () => Promise<void>;
@@ -28,13 +39,16 @@ export const useConnectionStore = create<ConnectionStore>()(
       },
 
       createConnection: async (data: ConnectionFormData) => {
-        const newConnection: Connection = {
+        const newConnection: ConnectionWithCredentials = {
           id: `conn-${Date.now()}`,
           name: data.name,
           providerType: data.providerType,
           baseUrl: data.baseUrl,
           authScheme: data.authScheme,
           hasCredentials: !!(data.apiKey || data.secret),
+          apiKey: data.apiKey,
+          secret: data.secret,
+          customAuth: data.customAuth,
           extraHeaders: data.extraHeaders,
           allowedHosts: data.allowedHosts,
           allowedPathPrefixes: data.allowedPathPrefixes,
@@ -44,44 +58,62 @@ export const useConnectionStore = create<ConnectionStore>()(
           updatedAt: new Date().toISOString(),
         };
         
-        set(state => ({ connections: [...state.connections, newConnection] }));
+        set(state => {
+          const connections = [...state.connections, newConnection];
+          // Sincronizar com backend
+          schedulSync({ connections });
+          return { connections };
+        });
+        
         return newConnection;
       },
 
       updateConnection: async (id: string, data: Partial<ConnectionFormData>) => {
-        let updated: Connection | undefined;
+        let updated: ConnectionWithCredentials | undefined;
         
-        set(state => ({
-          connections: state.connections.map(conn => {
+        set(state => {
+          const connections = state.connections.map(conn => {
             if (conn.id === id) {
               updated = {
                 ...conn,
                 ...data,
+                apiKey: data.apiKey || conn.apiKey,
+                secret: data.secret || conn.secret,
+                customAuth: data.customAuth || conn.customAuth,
                 hasCredentials: data.apiKey ? true : conn.hasCredentials,
                 updatedAt: new Date().toISOString(),
               };
               return updated;
             }
             return conn;
-          }),
-        }));
+          });
+          // Sincronizar com backend
+          schedulSync({ connections });
+          return { connections };
+        });
         
         if (!updated) throw new Error('Connection not found');
         return updated;
       },
 
       deleteConnection: async (id: string) => {
-        set(state => ({
-          connections: state.connections.filter(conn => conn.id !== id),
-        }));
+        set(state => {
+          const connections = state.connections.filter(conn => conn.id !== id);
+          // Sincronizar com backend
+          schedulSync({ connections });
+          return { connections };
+        });
       },
 
       toggleConnection: async (id: string) => {
-        set(state => ({
-          connections: state.connections.map(conn =>
+        set(state => {
+          const connections = state.connections.map(conn =>
             conn.id === id ? { ...conn, enabled: !conn.enabled, updatedAt: new Date().toISOString() } : conn
-          ),
-        }));
+          );
+          // Sincronizar com backend
+          schedulSync({ connections });
+          return { connections };
+        });
       },
 
       testConnection: async (id: string) => {
