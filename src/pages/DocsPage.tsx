@@ -19,7 +19,14 @@ import {
   FileCode,
   Key,
   Container,
-  HardDrive
+  HardDrive,
+  Store,
+  ShoppingBag,
+  Brain,
+  Plug,
+  ExternalLink,
+  Copy,
+  Zap
 } from 'lucide-react';
 
 function StepCard({ step, icon: Icon, title, children }: { 
@@ -564,18 +571,511 @@ sudo journalctl -u apibridge -f`} />
   );
 }
 
+function ProvidersTab() {
+  const yampiExample = `// Exemplo de requisição via API Bridge para Yampi
+const response = await fetch('https://seu-apibridge.com/api/proxy', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Client-Token': 'ab_SeuTokenDeCliente'
+  },
+  body: JSON.stringify({
+    connectionId: 'conn-yampi-001',
+    method: 'GET',
+    path: '/orders',
+    query: {
+      page: '1',
+      limit: '20',
+      include: 'customer,items'
+    }
+  })
+});
+
+const data = await response.json();
+console.log(data);`;
+
+  const yampiEndpoints = `# Endpoints Principais da Yampi
+
+## Pedidos
+GET  /orders                    # Listar pedidos
+GET  /orders/{id}               # Pedido por ID
+GET  /orders/number/{number}    # Pedido por número
+PUT  /orders/{id}/status        # Atualizar status
+
+## Produtos  
+GET  /catalog/products          # Listar produtos
+GET  /catalog/products/{id}     # Produto por ID
+GET  /catalog/products/{id}/skus # SKUs do produto
+
+## Clientes
+GET  /customers                 # Listar clientes
+GET  /customers/{id}            # Cliente por ID
+GET  /customers/{id}/orders     # Pedidos do cliente
+
+## Categorias e Marcas
+GET  /catalog/categories        # Listar categorias
+GET  /catalog/brands            # Listar marcas
+
+## Checkout
+GET  /checkout/carts            # Listar carrinhos
+GET  /checkout/carts/{id}       # Carrinho por ID`;
+
+  const shopifyExample = `// Exemplo de requisição via API Bridge para Shopify
+const response = await fetch('https://seu-apibridge.com/api/proxy', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Client-Token': 'ab_SeuTokenDeCliente'
+  },
+  body: JSON.stringify({
+    connectionId: 'conn-shopify-001',
+    method: 'GET',
+    path: '/products.json',
+    query: {
+      limit: '50',
+      status: 'active'
+    }
+  })
+});
+
+const data = await response.json();
+console.log(data.products);`;
+
+  const shopifyEndpoints = `# Endpoints Principais do Shopify
+
+## Produtos
+GET  /products.json                    # Listar produtos
+GET  /products/{id}.json               # Produto por ID
+GET  /products/count.json              # Total de produtos
+POST /products.json                    # Criar produto
+PUT  /products/{id}.json               # Atualizar produto
+
+## Pedidos
+GET  /orders.json                      # Listar pedidos
+GET  /orders/{id}.json                 # Pedido por ID
+GET  /orders/count.json                # Total de pedidos
+PUT  /orders/{id}.json                 # Atualizar pedido
+
+## Clientes
+GET  /customers.json                   # Listar clientes
+GET  /customers/{id}.json              # Cliente por ID
+GET  /customers/search.json?query=     # Buscar clientes
+
+## Inventário
+GET  /inventory_levels.json            # Níveis de estoque
+POST /inventory_levels/set.json        # Definir estoque
+
+## Coleções
+GET  /custom_collections.json          # Coleções personalizadas
+GET  /smart_collections.json           # Coleções inteligentes`;
+
+  const openaiExample = `// Exemplo de requisição via API Bridge para OpenAI
+const response = await fetch('https://seu-apibridge.com/api/proxy', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Client-Token': 'ab_SeuTokenDeCliente'
+  },
+  body: JSON.stringify({
+    connectionId: 'conn-openai-001',
+    method: 'POST',
+    path: '/chat/completions',
+    body: {
+      model: 'gpt-4',
+      messages: [
+        { role: 'system', content: 'Você é um assistente útil.' },
+        { role: 'user', content: 'Olá, como você pode me ajudar?' }
+      ],
+      max_tokens: 500
+    }
+  })
+});
+
+const data = await response.json();
+console.log(data.choices[0].message.content);`;
+
+  const openaiEndpoints = `# Endpoints Principais da OpenAI
+
+## Chat Completions (GPT-4, GPT-3.5)
+POST /chat/completions          # Gerar resposta de chat
+
+## Embeddings
+POST /embeddings                # Gerar embeddings de texto
+
+## Imagens (DALL-E)
+POST /images/generations        # Gerar imagens
+POST /images/edits              # Editar imagens
+POST /images/variations         # Variações de imagem
+
+## Áudio (Whisper)
+POST /audio/transcriptions      # Transcrever áudio
+POST /audio/translations        # Traduzir áudio
+POST /audio/speech              # Text-to-Speech
+
+## Modelos
+GET  /models                    # Listar modelos disponíveis
+GET  /models/{id}               # Detalhes do modelo
+
+## Moderação
+POST /moderations               # Verificar conteúdo`;
+
+  const genericExample = `// Exemplo de requisição genérica via API Bridge
+const response = await fetch('https://seu-apibridge.com/api/proxy', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Client-Token': 'ab_SeuTokenDeCliente'
+  },
+  body: JSON.stringify({
+    connectionId: 'conn-minha-api-001',
+    method: 'GET',  // ou POST, PUT, PATCH, DELETE
+    path: '/seu/endpoint',
+    query: {
+      param1: 'valor1',
+      param2: 'valor2'
+    },
+    headers: {
+      'X-Custom-Header': 'valor-customizado'
+    },
+    body: {
+      // Para POST/PUT/PATCH
+      campo1: 'valor1'
+    }
+  })
+});`;
+
+  return (
+    <div className="space-y-8">
+      {/* Introdução */}
+      <Alert>
+        <Plug className="h-4 w-4" />
+        <AlertTitle>Como Usar os Provedores</AlertTitle>
+        <AlertDescription>
+          Após configurar uma conexão no painel, você pode fazer requisições através do endpoint 
+          <code className="mx-1 px-2 py-0.5 bg-secondary rounded">/api/proxy</code> 
+          usando o token do cliente e o ID da conexão.
+        </AlertDescription>
+      </Alert>
+
+      {/* Estrutura da Requisição */}
+      <Card className="gradient-card border-border">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="w-5 h-5 text-primary" />
+            Estrutura da Requisição
+          </CardTitle>
+          <CardDescription>
+            Todas as requisições seguem o mesmo padrão
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CodeBlock 
+            code={`POST /api/proxy
+Headers:
+  Content-Type: application/json
+  X-Client-Token: ab_SeuTokenDeCliente
+
+Body:
+{
+  "connectionId": "conn-xxx",     // ID da conexão configurada
+  "method": "GET|POST|PUT|PATCH|DELETE",
+  "path": "/endpoint",            // Path relativo à URL base
+  "query": { "key": "value" },    // Query params (opcional)
+  "headers": { "X-Custom": "..." }, // Headers extras (opcional)
+  "body": { ... }                 // Body para POST/PUT/PATCH
+}`}
+            filename="Estrutura da Requisição"
+          />
+        </CardContent>
+      </Card>
+
+      {/* Yampi */}
+      <Card className="gradient-card border-border">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+              <Store className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <CardTitle>Yampi</CardTitle>
+              <CardDescription>E-commerce brasileiro</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Key className="w-4 h-4" />
+                Credenciais Necessárias
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• <strong>User Token</strong> - Encontrado em Perfil → Credenciais de API</li>
+                <li>• <strong>User Secret Key</strong> - Na mesma página</li>
+                <li>• <strong>Alias da Loja</strong> - Identificador único (ex: minha-loja)</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                URL Base
+              </h4>
+              <code className="text-sm bg-secondary px-2 py-1 rounded block">
+                https://api.dooki.com.br/v2/{'{alias}'}
+              </code>
+              <p className="text-xs text-muted-foreground mt-2">
+                <a 
+                  href="https://docs.yampi.com.br" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline flex items-center gap-1"
+                >
+                  Documentação oficial <ExternalLink className="w-3 h-3" />
+                </a>
+              </p>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
+            <CodeBlock code={yampiExample} filename="JavaScript" showLineNumbers />
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2">Endpoints Disponíveis</h4>
+            <CodeBlock code={yampiEndpoints} filename="Referência" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Shopify */}
+      <Card className="gradient-card border-border">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <CardTitle>Shopify</CardTitle>
+              <CardDescription>Plataforma global de e-commerce</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Key className="w-4 h-4" />
+                Credenciais Necessárias
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• <strong>Access Token</strong> - Começa com <code>shpat_</code></li>
+                <li>• <strong>Nome da Loja</strong> - Parte antes de .myshopify.com</li>
+                <li>• <strong>Versão da API</strong> - Ex: 2024-01</li>
+              </ul>
+              <Alert className="mt-3">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  Crie um Custom App em Settings → Apps → Develop apps para obter o Access Token.
+                </AlertDescription>
+              </Alert>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                URL Base
+              </h4>
+              <code className="text-sm bg-secondary px-2 py-1 rounded block">
+                https://{'{loja}'}.myshopify.com/admin/api/{'{versão}'}
+              </code>
+              <p className="text-xs text-muted-foreground mt-2">
+                <a 
+                  href="https://shopify.dev/docs/api" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline flex items-center gap-1"
+                >
+                  Documentação oficial <ExternalLink className="w-3 h-3" />
+                </a>
+              </p>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
+            <CodeBlock code={shopifyExample} filename="JavaScript" showLineNumbers />
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2">Endpoints Disponíveis</h4>
+            <CodeBlock code={shopifyEndpoints} filename="Referência" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* OpenAI */}
+      <Card className="gradient-card border-border">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+              <Brain className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <CardTitle>OpenAI</CardTitle>
+              <CardDescription>GPT, DALL-E, Whisper e mais</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Key className="w-4 h-4" />
+                Credenciais Necessárias
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• <strong>API Key</strong> - Começa com <code>sk-</code></li>
+                <li>• <strong>Organization ID</strong> (opcional) - Começa com <code>org-</code></li>
+              </ul>
+              <Alert className="mt-3">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  Acesse platform.openai.com → API Keys para criar sua chave.
+                </AlertDescription>
+              </Alert>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Globe className="w-4 h-4" />
+                URL Base
+              </h4>
+              <code className="text-sm bg-secondary px-2 py-1 rounded block">
+                https://api.openai.com/v1
+              </code>
+              <p className="text-xs text-muted-foreground mt-2">
+                <a 
+                  href="https://platform.openai.com/docs" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline flex items-center gap-1"
+                >
+                  Documentação oficial <ExternalLink className="w-3 h-3" />
+                </a>
+              </p>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
+            <CodeBlock code={openaiExample} filename="JavaScript" showLineNumbers />
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2">Endpoints Disponíveis</h4>
+            <CodeBlock code={openaiEndpoints} filename="Referência" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* API Genérica */}
+      <Card className="gradient-card border-border">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <Globe className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <CardTitle>API Genérica</CardTitle>
+              <CardDescription>Qualquer API REST</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Key className="w-4 h-4" />
+                Tipos de Autenticação
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• <strong>Bearer</strong> - Authorization: Bearer [token]</li>
+                <li>• <strong>Basic</strong> - Authorization: Basic [base64]</li>
+                <li>• <strong>Header Pair</strong> - Dois headers separados</li>
+                <li>• <strong>Custom</strong> - Header e template personalizados</li>
+                <li>• <strong>Query</strong> - Token via query string</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Restrições de Segurança
+              </h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• <strong>Hosts Permitidos</strong> - Lista de domínios</li>
+                <li>• <strong>Prefixos de Path</strong> - Limitar endpoints</li>
+                <li>• <strong>Métodos HTTP</strong> - GET, POST, etc.</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-medium mb-2">Exemplo de Uso</h4>
+            <CodeBlock code={genericExample} filename="JavaScript" showLineNumbers />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Erros Comuns */}
+      <Card className="border-destructive/50 bg-destructive/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="w-5 h-5" />
+            Erros Comuns e Soluções
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          <div>
+            <p className="font-medium">UNAUTHORIZED - Token inválido</p>
+            <p className="text-muted-foreground">Verifique se o X-Client-Token está correto e se o cliente está ativo.</p>
+          </div>
+          <div>
+            <p className="font-medium">CONNECTION_NOT_FOUND - Conexão não encontrada</p>
+            <p className="text-muted-foreground">Confirme o connectionId e se a conexão está habilitada.</p>
+          </div>
+          <div>
+            <p className="font-medium">PATH_NOT_ALLOWED - Path bloqueado</p>
+            <p className="text-muted-foreground">O path não está nos prefixos permitidos da conexão.</p>
+          </div>
+          <div>
+            <p className="font-medium">METHOD_NOT_ALLOWED - Método bloqueado</p>
+            <p className="text-muted-foreground">O método HTTP não está habilitado para esta conexão.</p>
+          </div>
+          <div>
+            <p className="font-medium">RATE_LIMITED - Limite excedido</p>
+            <p className="text-muted-foreground">Aguarde alguns segundos e tente novamente.</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function DocsPage() {
   return (
     <div className="min-h-screen bg-background flex">
       <Sidebar />
       <main className="flex-1 p-8 overflow-auto">
         <PageHeader 
-          title="Documentação de Instalação" 
-          description="Guia passo a passo para instalar o API Bridge em diferentes plataformas"
+          title="Documentação" 
+          description="Guia completo de instalação e uso dos provedores de API"
         />
 
-        <Tabs defaultValue="easypanel" className="w-full">
+        <Tabs defaultValue="providers" className="w-full">
           <TabsList className="mb-6">
+            <TabsTrigger value="providers" className="gap-2">
+              <Plug className="w-4 h-4" />
+              Provedores de API
+            </TabsTrigger>
             <TabsTrigger value="easypanel" className="gap-2">
               <Server className="w-4 h-4" />
               EasyPanel
@@ -591,6 +1091,9 @@ export function DocsPage() {
           </TabsList>
 
           <ScrollArea className="h-[calc(100vh-220px)]">
+            <TabsContent value="providers" className="mt-0 pr-4">
+              <ProvidersTab />
+            </TabsContent>
             <TabsContent value="easypanel" className="mt-0 pr-4">
               <EasyPanelTab />
             </TabsContent>
