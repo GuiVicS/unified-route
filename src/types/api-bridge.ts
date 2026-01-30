@@ -2,7 +2,12 @@
 
 export type ProviderType = 'AUTO' | 'GENERIC' | 'OPENAI' | 'SHOPIFY' | 'DOOKI' | 'YAMPI' | 'CUSTOM';
 
-export type AuthScheme = 'BEARER' | 'BASIC' | 'HEADER_PAIR' | 'QUERY' | 'NONE';
+export type AuthScheme = 'BEARER' | 'BASIC' | 'HEADER_PAIR' | 'QUERY' | 'CUSTOM' | 'NONE';
+
+export interface CustomAuthConfig {
+  headerName: string;
+  headerValueTemplate: string; // e.g., "Token {{apiKey}}" or "{{apiKey}}:{{secret}}"
+}
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -30,6 +35,7 @@ export interface ConnectionFormData {
   authScheme: AuthScheme;
   apiKey?: string;
   secret?: string;
+  customAuth?: CustomAuthConfig;
   extraHeaders?: Record<string, string>;
   allowedHosts?: string[];
   allowedPathPrefixes?: string[];
