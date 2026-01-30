@@ -689,19 +689,22 @@ function ServerStep() {
     upstreamTimeoutMs: 15000,
   };
 
+  // Ensure corsOrigins is always an array
+  const corsOrigins = server.corsOrigins || [];
+
   const updateServer = (field: keyof typeof server, value: any) => {
     updateConfig('server', { ...server, [field]: value });
   };
 
   const addOrigin = () => {
-    if (originInput && !server.corsOrigins.includes(originInput)) {
-      updateServer('corsOrigins', [...server.corsOrigins, originInput]);
+    if (originInput && !corsOrigins.includes(originInput)) {
+      updateServer('corsOrigins', [...corsOrigins, originInput]);
       setOriginInput('');
     }
   };
 
   const removeOrigin = (origin: string) => {
-    updateServer('corsOrigins', server.corsOrigins.filter(o => o !== origin));
+    updateServer('corsOrigins', corsOrigins.filter(o => o !== origin));
   };
 
   return (
@@ -767,7 +770,7 @@ function ServerStep() {
             <Button variant="outline" onClick={addOrigin}>Adicionar</Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {server.corsOrigins.map(origin => (
+            {corsOrigins.map(origin => (
               <div key={origin} className="flex items-center gap-1 px-2 py-1 rounded bg-secondary text-sm">
                 <code className="text-xs">{origin}</code>
                 <button 
