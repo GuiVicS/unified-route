@@ -22,7 +22,7 @@ export function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError('Invalid credentials');
+      setError('Credenciais inválidas');
     } finally {
       setIsLoading(false);
     }
@@ -36,31 +36,31 @@ export function LoginPage() {
             <Zap className="w-7 h-7 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-semibold text-foreground">API Bridge</h1>
-          <p className="text-sm text-muted-foreground mt-1">Sign in to admin panel</p>
+          <p className="text-sm text-muted-foreground mt-1">Entrar no painel administrativo</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-mail</Label>
             <Input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@yourcompany.com"
+              placeholder="admin@suaempresa.com"
               required
               autoComplete="email"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Senha</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
+              placeholder="Digite sua senha"
               required
               autoComplete="current-password"
             />
@@ -77,10 +77,10 @@ export function LoginPage() {
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Signing in...
+                Entrando...
               </>
             ) : (
-              'Sign in'
+              'Entrar'
             )}
           </Button>
         </form>
@@ -92,7 +92,7 @@ export function LoginPage() {
             onClick={resetSetup}
           >
             <Settings className="w-4 h-4 mr-2" />
-            Run Setup Again
+            Executar Configuração Novamente
           </Button>
         </div>
       </div>

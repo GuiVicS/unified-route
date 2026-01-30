@@ -107,18 +107,18 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Connection Name</Label>
+          <Label htmlFor="name">Nome da Conexão</Label>
           <Input
             id="name"
             value={formData.name}
             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="e.g., OpenAI Production"
+            placeholder="ex: OpenAI Produção"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="providerType">Provider Type</Label>
+          <Label htmlFor="providerType">Tipo de Provedor</Label>
           <Select 
             value={formData.providerType}
             onValueChange={(v) => setFormData(prev => ({ ...prev, providerType: v as ProviderType }))}
@@ -129,7 +129,7 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
             <SelectContent>
               {PROVIDER_TYPES.map(type => (
                 <SelectItem key={type} value={type}>
-                  {type === 'AUTO' ? 'Auto-detect' : type}
+                  {type === 'AUTO' ? 'Auto-detectar' : type}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -138,19 +138,19 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="baseUrl">Base URL</Label>
+        <Label htmlFor="baseUrl">URL Base</Label>
         <div className="relative">
           <Input
             id="baseUrl"
             value={formData.baseUrl}
             onChange={(e) => setFormData(prev => ({ ...prev, baseUrl: e.target.value }))}
-            placeholder="https://api.example.com/v1"
+            placeholder="https://api.exemplo.com/v1"
             required
           />
           {autoDetected && (
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-success animate-fade-in">
               <Wand2 className="w-3 h-3" />
-              Auto-detected
+              Auto-detectado
             </div>
           )}
         </div>
@@ -158,7 +158,7 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="authScheme">Authentication</Label>
+          <Label htmlFor="authScheme">Autenticação</Label>
           <Select 
             value={formData.authScheme}
             onValueChange={(v) => setFormData(prev => ({ ...prev, authScheme: v as AuthScheme }))}
@@ -180,24 +180,24 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
               checked={formData.enabled}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, enabled: checked }))}
             />
-            <Label>Enabled</Label>
+            <Label>Ativada</Label>
           </div>
         </div>
       </div>
 
       <div className="space-y-4 p-4 rounded-lg bg-secondary/30 border border-border">
-        <h4 className="text-sm font-medium text-foreground">Credentials</h4>
+        <h4 className="text-sm font-medium text-foreground">Credenciais</h4>
         {initialData && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <AlertCircle className="w-3 h-3" />
-            Leave empty to keep existing credentials
+            Deixe em branco para manter as credenciais existentes
           </div>
         )}
         
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="apiKey">
-              {formData.authScheme === 'HEADER_PAIR' ? 'User Token' : 'API Key / Token'}
+              {formData.authScheme === 'HEADER_PAIR' ? 'User Token' : 'Chave de API / Token'}
             </Label>
             <Input
               id="apiKey"
@@ -211,7 +211,7 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
           {(formData.authScheme === 'BASIC' || formData.authScheme === 'HEADER_PAIR') && (
             <div className="space-y-2">
               <Label htmlFor="secret">
-                {formData.authScheme === 'HEADER_PAIR' ? 'Secret Key' : 'Password'}
+                {formData.authScheme === 'HEADER_PAIR' ? 'Secret Key' : 'Senha'}
               </Label>
               <Input
                 id="secret"
@@ -226,32 +226,32 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
       </div>
 
       <div className="space-y-4 p-4 rounded-lg bg-secondary/30 border border-border">
-        <h4 className="text-sm font-medium text-foreground">Security Restrictions (Optional)</h4>
+        <h4 className="text-sm font-medium text-foreground">Restrições de Segurança (Opcional)</h4>
         
         <div className="space-y-2">
-          <Label htmlFor="allowedHosts">Allowed Hosts</Label>
+          <Label htmlFor="allowedHosts">Hosts Permitidos</Label>
           <Input
             id="allowedHosts"
             value={hostsInput}
             onChange={(e) => setHostsInput(e.target.value)}
-            placeholder="api.example.com, api2.example.com"
+            placeholder="api.exemplo.com, api2.exemplo.com"
           />
-          <p className="text-xs text-muted-foreground">Comma-separated list of allowed target hosts</p>
+          <p className="text-xs text-muted-foreground">Lista de hosts de destino permitidos, separados por vírgula</p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="allowedPrefixes">Allowed Path Prefixes</Label>
+          <Label htmlFor="allowedPrefixes">Prefixos de Path Permitidos</Label>
           <Input
             id="allowedPrefixes"
             value={prefixesInput}
             onChange={(e) => setPrefixesInput(e.target.value)}
             placeholder="/v1, /orders, /customers"
           />
-          <p className="text-xs text-muted-foreground">Comma-separated list of allowed path prefixes</p>
+          <p className="text-xs text-muted-foreground">Lista de prefixos de path permitidos, separados por vírgula</p>
         </div>
 
         <div className="space-y-2">
-          <Label>Allowed Methods</Label>
+          <Label>Métodos Permitidos</Label>
           <div className="flex flex-wrap gap-2">
             {HTTP_METHODS.map(method => (
               <Badge
@@ -269,11 +269,11 @@ export function ConnectionForm({ initialData, onSubmit, onCancel }: ConnectionFo
 
       <div className="flex justify-end gap-3 pt-4 border-t border-border">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {initialData ? 'Update Connection' : 'Create Connection'}
+          {initialData ? 'Atualizar Conexão' : 'Criar Conexão'}
         </Button>
       </div>
     </form>

@@ -44,6 +44,7 @@ import {
 import { ClientForm } from '@/components/clients/ClientForm';
 import type { Client, ClientFormData, ClientWithToken } from '@/types/api-bridge';
 import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export function ClientsPage() {
   const { 
@@ -99,12 +100,12 @@ export function ClientsPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Clients" 
-        description="Manage API client tokens for external access"
+        title="Clientes" 
+        description="Gerencie tokens de acesso para aplicações externas"
         action={
           <Button onClick={() => setIsCreateOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            New Client
+            Novo Cliente
           </Button>
         }
       />
@@ -115,10 +116,10 @@ export function ClientsPage() {
         </div>
       ) : clients.length === 0 ? (
         <div className="text-center py-12 gradient-card border border-border rounded-lg">
-          <p className="text-muted-foreground mb-4">No clients configured yet</p>
+          <p className="text-muted-foreground mb-4">Nenhum cliente configurado ainda</p>
           <Button onClick={() => setIsCreateOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Create your first client
+            Criar seu primeiro cliente
           </Button>
         </div>
       ) : (
@@ -133,22 +134,22 @@ export function ClientsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm font-medium text-foreground">{client.name}</h3>
-                    {!client.enabled && <Badge variant="muted">Disabled</Badge>}
+                    {!client.enabled && <Badge variant="muted">Desativado</Badge>}
                   </div>
                   <div className="flex items-center gap-3 mt-1">
                     {client.allowedOrigins && client.allowedOrigins.length > 0 && (
                       <span className="text-xs text-muted-foreground">
-                        {client.allowedOrigins.length} origin{client.allowedOrigins.length !== 1 ? 's' : ''}
+                        {client.allowedOrigins.length} origem{client.allowedOrigins.length !== 1 ? 's' : ''}
                       </span>
                     )}
                     {client.allowedConnectionIds && client.allowedConnectionIds.length > 0 && (
                       <span className="text-xs text-muted-foreground">
-                        {client.allowedConnectionIds.length} connection{client.allowedConnectionIds.length !== 1 ? 's' : ''}
+                        {client.allowedConnectionIds.length} conexão{client.allowedConnectionIds.length !== 1 ? 'ões' : ''}
                       </span>
                     )}
                     {client.lastUsedAt && (
                       <span className="text-xs text-muted-foreground">
-                        Last used {formatDistanceToNow(new Date(client.lastUsedAt), { addSuffix: true })}
+                        Último uso {formatDistanceToNow(new Date(client.lastUsedAt), { addSuffix: true, locale: ptBR })}
                       </span>
                     )}
                   </div>
@@ -165,15 +166,15 @@ export function ClientsPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setEditClient(client)}>
                       <Pencil className="w-4 h-4 mr-2" />
-                      Edit
+                      Editar
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => toggleClient(client.id)}>
                       <Power className="w-4 h-4 mr-2" />
-                      {client.enabled ? 'Disable' : 'Enable'}
+                      {client.enabled ? 'Desativar' : 'Ativar'}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleRegenerate(client)}>
                       <Key className="w-4 h-4 mr-2" />
-                      Regenerate Token
+                      Regenerar Token
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
@@ -181,7 +182,7 @@ export function ClientsPage() {
                       onClick={() => setDeleteId(client.id)}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
+                      Excluir
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -195,9 +196,9 @@ export function ClientsPage() {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>New Client</DialogTitle>
+            <DialogTitle>Novo Cliente</DialogTitle>
             <DialogDescription>
-              Create a new client token for API access
+              Crie um novo token de cliente para acesso à API
             </DialogDescription>
           </DialogHeader>
           <ClientForm 
@@ -212,9 +213,9 @@ export function ClientsPage() {
       <Dialog open={!!editClient} onOpenChange={() => setEditClient(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Edit Client</DialogTitle>
+            <DialogTitle>Editar Cliente</DialogTitle>
             <DialogDescription>
-              Update client settings
+              Atualize as configurações do cliente
             </DialogDescription>
           </DialogHeader>
           {editClient && (
@@ -232,9 +233,9 @@ export function ClientsPage() {
       <Dialog open={!!newToken} onOpenChange={() => setNewToken(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Client Token Created</DialogTitle>
+            <DialogTitle>Token de Cliente Criado</DialogTitle>
             <DialogDescription>
-              Copy this token now. It will not be shown again.
+              Copie este token agora. Ele não será mostrado novamente.
             </DialogDescription>
           </DialogHeader>
           
@@ -242,17 +243,17 @@ export function ClientsPage() {
             <div className="flex items-start gap-3 p-3 rounded-lg bg-warning/10 border border-warning/20">
               <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
-                This token grants access to your API Bridge. Store it securely and never expose it in client-side code.
+                Este token permite acesso ao seu API Bridge. Guarde-o em local seguro e nunca exponha em código client-side.
               </p>
             </div>
             
             {newToken && (
-              <CopyField label={`Token for "${newToken.clientName}"`} value={newToken.token} />
+              <CopyField label={`Token para "${newToken.clientName}"`} value={newToken.token} />
             )}
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setNewToken(null)}>Done</Button>
+            <Button onClick={() => setNewToken(null)}>Concluído</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -261,18 +262,18 @@ export function ClientsPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Client</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Cliente</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. All requests using this client token will fail.
+              Esta ação não pode ser desfeita. Todas as requisições usando este token irão falhar.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDelete}
             >
-              Delete
+              Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

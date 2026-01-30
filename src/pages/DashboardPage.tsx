@@ -71,34 +71,34 @@ export function DashboardPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Dashboard" 
-        description="Overview of your API Bridge instance"
+        title="Painel" 
+        description="Visão geral da sua instância do API Bridge"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
-          title="Connections"
+          title="Conexões"
           value={connections.length}
-          subtitle={connections.length > 0 ? `${activeConnections} active` : undefined}
+          subtitle={connections.length > 0 ? `${activeConnections} ativas` : undefined}
           icon={Link2}
-          emptyAction={{ label: 'Create first connection', href: '/connections' }}
+          emptyAction={{ label: 'Criar primeira conexão', href: '/connections' }}
         />
         <StatCard
-          title="Clients"
+          title="Clientes"
           value={clients.length}
-          subtitle={clients.length > 0 ? `${activeClients} active` : undefined}
+          subtitle={clients.length > 0 ? `${activeClients} ativos` : undefined}
           icon={Key}
-          emptyAction={{ label: 'Create first client', href: '/clients' }}
+          emptyAction={{ label: 'Criar primeiro cliente', href: '/clients' }}
         />
         <StatCard
-          title="Requests Today"
-          value={stats.requestsToday.toLocaleString()}
+          title="Requisições Hoje"
+          value={stats.requestsToday.toLocaleString('pt-BR')}
           icon={Activity}
         />
         <StatCard
-          title="Avg Latency"
+          title="Latência Média"
           value={stats.avgLatencyMs > 0 ? `${stats.avgLatencyMs}ms` : '-'}
-          subtitle={stats.errorRate > 0 ? `${stats.errorRate}% error rate` : undefined}
+          subtitle={stats.errorRate > 0 ? `${stats.errorRate}% de erros` : undefined}
           icon={Clock}
         />
       </div>
@@ -108,21 +108,21 @@ export function DashboardPage() {
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
             <Link2 className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Get Started</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Comece Agora</h2>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-            Create your first API connection to start proxying requests securely.
+            Crie sua primeira conexão de API para começar a fazer proxy de requisições de forma segura.
           </p>
           <div className="flex justify-center gap-3">
             <Button asChild>
               <Link to="/connections">
                 <Plus className="w-4 h-4 mr-2" />
-                Create Connection
+                Criar Conexão
               </Link>
             </Button>
             <Button variant="outline" asChild>
               <Link to="/clients">
                 <Key className="w-4 h-4 mr-2" />
-                Create Client Token
+                Criar Token de Cliente
               </Link>
             </Button>
           </div>
@@ -131,9 +131,9 @@ export function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="gradient-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-foreground">Active Connections</h2>
+              <h2 className="text-lg font-medium text-foreground">Conexões Ativas</h2>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/connections">View all</Link>
+                <Link to="/connections">Ver todas</Link>
               </Button>
             </div>
             <div className="space-y-3">
@@ -151,7 +151,7 @@ export function DashboardPage() {
               ))}
               {connections.filter(c => c.enabled).length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No active connections
+                  Nenhuma conexão ativa
                 </p>
               )}
             </div>
@@ -159,9 +159,9 @@ export function DashboardPage() {
 
           <div className="gradient-card border border-border rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-medium text-foreground">Recent Requests</h2>
+              <h2 className="text-lg font-medium text-foreground">Requisições Recentes</h2>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/logs">View all</Link>
+                <Link to="/logs">Ver todas</Link>
               </Button>
             </div>
             <div className="space-y-2">
@@ -184,7 +184,7 @@ export function DashboardPage() {
               ))}
               {logs.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  No requests yet
+                  Nenhuma requisição ainda
                 </p>
               )}
             </div>
