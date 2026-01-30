@@ -99,14 +99,40 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
   },
 
   testConnection: async (id: string) => {
-    // In production: POST /api/connections/:id/test
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+    const connection = get().connections.find(c => c.id === id);
+    if (!connection) {
+      return { success: false, latencyMs: 0, error: 'Conexão não encontrada' };
+    }
+
+    const startTime = Date.now();
     
-    const success = Math.random() > 0.2;
-    return {
-      success,
-      latencyMs: Math.floor(100 + Math.random() * 400),
-      error: success ? undefined : 'Connection timeout',
-    };
+    try {
+      // Tenta fazer uma requisição real para a URL base
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(connection.baseUrl, {
+        method: 'HEAD',
+        mode: 'no-cors', // Permite testar URLs externas sem CORS
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeout);
+      const latencyMs = Date.now() - startTime;
+      
+      // Em modo no-cors, não temos acesso ao status, mas se não deu erro, passou
+      return { success: true, latencyMs };
+    } catch (error) {
+      const latencyMs = Date.now() - startTime;
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          return { success: false, latencyMs, error: 'Timeout (10s)' };
+        }
+        return { success: false, latencyMs, error: error.message };
+      }
+      
+      return { success: false, latencyMs, error: 'Falha na conexão' };
+    }
   },
 }));
