@@ -1,44 +1,80 @@
+# ===========================================
 # API Bridge - Dockerfile
-# Imagem multi-stage para build otimizado
+# Imagem multi-stage otimizada para produção
+# ===========================================
 
 # ==============================
-# Stage 1: Build do Frontend
+# Stage 1: Instalação de dependências
 # ==============================
-FROM node:20-alpine AS frontend-builder
-
-WORKDIR /app/frontend
-
-# Instalar dependências primeiro (cache)
-COPY package*.json ./
-RUN npm ci
-
-# Copiar código fonte e buildar
-COPY . .
-RUN npm run build
-
-# ==============================
-# Stage 2: Imagem de Produção
-# ==============================
-FROM node:20-alpine AS production
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
-# Instalar dumb-init para gerenciamento de processos
-RUN apk add --no-cache dumb-init
+# Instalar dependências de build
+RUN apk add --no-cache libc6-compat
 
-# Criar usuário não-root
+# Copiar apenas arquivos de dependência para cache
+COPY package.json package-lock.json* bun.lockb* ./
+
+# Instalar dependências (preferir bun se disponível)
+RUN if [ -f bun.lockb ]; then \
+      npm install -g bun && bun install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then \
+      npm ci --only=production=false; \
+    else \
+      npm install; \
+    fi
+
+# ==============================
+# Stage 2: Build do Frontend
+# ==============================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copiar node_modules do stage anterior
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Build da aplicação
+ENV NODE_ENV=production
+RUN npm run build
+
+# ==============================
+# Stage 3: Imagem de Produção
+# ==============================
+FROM node:20-alpine AS production
+
+LABEL maintainer="API Bridge Team"
+LABEL description="API Bridge - Ponte Universal de APIs"
+LABEL version="1.0.0"
+
+WORKDIR /app
+
+# Instalar apenas o necessário para produção
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Criar usuário não-root por segurança
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S apibridge -u 1001
+    adduser -S apibridge -u 1001 -G nodejs
+
+# Criar diretórios necessários
+RUN mkdir -p /app/public /app/data /app/logs && \
+    chown -R apibridge:nodejs /app
 
 # Copiar frontend buildado
-COPY --from=frontend-builder /app/frontend/dist ./public
+COPY --from=builder --chown=apibridge:nodejs /app/dist ./public
 
-# Criar diretório de dados
-RUN mkdir -p /app/data && chown -R apibridge:nodejs /app/data
+# Criar servidor estático inline (será substituído por backend real)
+COPY --chown=apibridge:nodejs docker/server.js ./server.js
 
 # Variáveis de ambiente padrão
-ENV NODE_ENV=production
-ENV PORT=3000
+ENV NODE_ENV=production \
+    PORT=3000 \
+    TZ=America/Sao_Paulo
 
 # Expor porta
 EXPOSE 3000
@@ -47,11 +83,14 @@ EXPOSE 3000
 USER apibridge
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Volume para dados persistentes
+VOLUME ["/app/data", "/app/logs"]
 
 # Usar dumb-init para gerenciar processos
 ENTRYPOINT ["dumb-init", "--"]
 
-# Comando padrão (será sobrescrito quando backend for implementado)
-CMD ["node", "-e", "const http=require('http');const fs=require('fs');const path=require('path');const server=http.createServer((req,res)=>{if(req.url==='/health'){res.writeHead(200);res.end('OK');return}let filePath=path.join('/app/public',req.url==='/'?'index.html':req.url);const ext=path.extname(filePath);const mimeTypes={'.html':'text/html','.js':'application/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.ico':'image/x-icon'};fs.readFile(filePath,(err,content)=>{if(err){fs.readFile('/app/public/index.html',(e,c)=>{res.writeHead(200,{'Content-Type':'text/html'});res.end(c)});return}res.writeHead(200,{'Content-Type':mimeTypes[ext]||'text/plain'});res.end(content)})});server.listen(process.env.PORT||3000,()=>console.log('API Bridge rodando na porta '+(process.env.PORT||3000)))"]
+# Comando padrão
+CMD ["node", "server.js"]
