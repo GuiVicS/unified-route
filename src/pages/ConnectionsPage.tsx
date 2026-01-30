@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { useConnectionStore } from '@/stores/connectionStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Plus, 
   MoreVertical, 
@@ -13,7 +14,10 @@ import {
   Power,
   Loader2,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Store,
+  Globe,
+  ArrowLeft
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -40,9 +44,12 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ConnectionForm } from '@/components/connections/ConnectionForm';
-import type { Connection, ConnectionFormData } from '@/types/api-bridge';
+import { YampiConnectionForm } from '@/components/connections/YampiConnectionForm';
+import type { Connection, ConnectionFormData, ProviderType } from '@/types/api-bridge';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
+type CreateMode = 'select' | 'yampi' | 'generic';
 
 export function ConnectionsPage() {
   const { 
@@ -57,10 +64,21 @@ export function ConnectionsPage() {
   } = useConnectionStore();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createMode, setCreateMode] = useState<CreateMode>('select');
   const [editConnection, setEditConnection] = useState<Connection | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [testingId, setTestingId] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{ id: string; success: boolean; latencyMs: number; error?: string } | null>(null);
+
+  const handleOpenCreate = () => {
+    setCreateMode('select');
+    setIsCreateOpen(true);
+  };
+
+  const handleCloseCreate = () => {
+    setIsCreateOpen(false);
+    setCreateMode('select');
+  };
 
   useEffect(() => {
     fetchConnections();
@@ -97,9 +115,91 @@ export function ConnectionsPage() {
     switch (type) {
       case 'OPENAI': return 'success';
       case 'DOOKI': return 'warning';
+      case 'YAMPI': return 'destructive';
       case 'SHOPIFY': return 'secondary';
       default: return 'muted';
     }
+  };
+
+  const renderProviderSelector = () => (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">Escolha um provedor para começar:</p>
+      <div className="grid grid-cols-2 gap-4">
+        <Card 
+          className="cursor-pointer hover:border-primary transition-colors"
+          onClick={() => setCreateMode('yampi')}
+        >
+          <CardHeader className="pb-2">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mb-2">
+              <Store className="w-5 h-5 text-white" />
+            </div>
+            <CardTitle className="text-base">Yampi</CardTitle>
+            <CardDescription className="text-xs">
+              E-commerce brasileiro com configuração otimizada
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Badge variant="secondary" className="text-xs">Recomendado</Badge>
+          </CardContent>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:border-primary transition-colors"
+          onClick={() => setCreateMode('generic')}
+        >
+          <CardHeader className="pb-2">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mb-2">
+              <Globe className="w-5 h-5 text-white" />
+            </div>
+            <CardTitle className="text-base">Outros Provedores</CardTitle>
+            <CardDescription className="text-xs">
+              OpenAI, Shopify, Dooki ou API genérica
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Badge variant="outline" className="text-xs">Flexível</Badge>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
+  const renderCreateForm = () => {
+    if (createMode === 'select') {
+      return renderProviderSelector();
+    }
+
+    if (createMode === 'yampi') {
+      return (
+        <div className="space-y-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCreateMode('select')}
+            className="mb-2"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar
+          </Button>
+          <YampiConnectionForm onSubmit={handleCreate} onCancel={handleCloseCreate} />
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setCreateMode('select')}
+          className="mb-2"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Button>
+        <ConnectionForm onSubmit={handleCreate} onCancel={handleCloseCreate} />
+      </div>
+    );
   };
 
   return (
@@ -108,7 +208,7 @@ export function ConnectionsPage() {
         title="Conexões" 
         description="Gerencie suas conexões com provedores de API"
         action={
-          <Button onClick={() => setIsCreateOpen(true)}>
+          <Button onClick={handleOpenCreate}>
             <Plus className="w-4 h-4 mr-2" />
             Nova Conexão
           </Button>
@@ -122,7 +222,7 @@ export function ConnectionsPage() {
       ) : connections.length === 0 ? (
         <div className="text-center py-12 gradient-card border border-border rounded-lg">
           <p className="text-muted-foreground mb-4">Nenhuma conexão configurada ainda</p>
-          <Button onClick={() => setIsCreateOpen(true)}>
+          <Button onClick={handleOpenCreate}>
             <Plus className="w-4 h-4 mr-2" />
             Criar sua primeira conexão
           </Button>
@@ -222,15 +322,20 @@ export function ConnectionsPage() {
       )}
 
       {/* Create Dialog */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+      <Dialog open={isCreateOpen} onOpenChange={handleCloseCreate}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Nova Conexão</DialogTitle>
+            <DialogTitle>
+              {createMode === 'select' ? 'Nova Conexão' : 
+               createMode === 'yampi' ? 'Conectar Yampi' : 'Nova Conexão'}
+            </DialogTitle>
             <DialogDescription>
-              Configure uma nova conexão com provedor de API
+              {createMode === 'select' ? 'Escolha o tipo de provedor para continuar' :
+               createMode === 'yampi' ? 'Configure sua conexão com a plataforma Yampi' :
+               'Configure uma nova conexão com provedor de API'}
             </DialogDescription>
           </DialogHeader>
-          <ConnectionForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
+          {renderCreateForm()}
         </DialogContent>
       </Dialog>
 
