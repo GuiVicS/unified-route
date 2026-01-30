@@ -19,12 +19,18 @@ import {
   Copy,
   RefreshCw,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  Container,
+  Download,
+  Terminal,
+  FileCode
 } from 'lucide-react';
 import { CopyField } from '@/components/ui/copy-button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const STEPS = [
   { id: 'welcome', title: 'Bem-vindo', icon: Zap },
+  { id: 'deploy', title: 'Tipo de Deploy', icon: Container },
   { id: 'database', title: 'Banco de Dados', icon: Database },
   { id: 'admin', title: 'Conta Admin', icon: User },
   { id: 'security', title: 'Segurança', icon: Shield },
@@ -109,11 +115,12 @@ export function SetupWizard() {
       <div className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-2xl mx-auto">
           {currentStep === 0 && <WelcomeStep />}
-          {currentStep === 1 && <DatabaseStep />}
-          {currentStep === 2 && <AdminStep />}
-          {currentStep === 3 && <SecurityStep />}
-          {currentStep === 4 && <ServerStep />}
-          {currentStep === 5 && <FinishStep />}
+          {currentStep === 1 && <DeployTypeStep />}
+          {currentStep === 2 && <DatabaseStep />}
+          {currentStep === 3 && <AdminStep />}
+          {currentStep === 4 && <SecurityStep />}
+          {currentStep === 5 && <ServerStep />}
+          {currentStep === 6 && <FinishStep />}
         </div>
       </div>
     </div>
@@ -134,12 +141,26 @@ function WelcomeStep() {
         <div className="gradient-card border border-border rounded-lg p-5">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+              <Container className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-medium text-foreground">Deploy com Docker</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Instalação simples e rápida usando Docker Compose. Ideal para VPS e servidores dedicados.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="gradient-card border border-border rounded-lg p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
               <Database className="w-5 h-5 text-primary" />
             </div>
             <div>
               <h3 className="font-medium text-foreground">Banco de Dados PostgreSQL</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Conecte ao seu banco de dados PostgreSQL onde o API Bridge irá armazenar conexões, clientes e logs.
+                Pode usar o PostgreSQL incluso no Docker ou conectar ao seu banco existente.
               </p>
             </div>
           </div>
@@ -151,36 +172,22 @@ function WelcomeStep() {
               <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-medium text-foreground">Chaves de Segurança</h3>
+              <h3 className="font-medium text-foreground">Segurança Integrada</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Gere chaves de criptografia para proteger suas credenciais de API em repouso.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="gradient-card border border-border rounded-lg p-5">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-              <Server className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-medium text-foreground">Configuração do Servidor</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Configure CORS, limite de requisições e outras configurações do servidor.
+                Criptografia AES-256 para credenciais, rate limiting e controle de CORS.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="p-4 rounded-lg bg-warning/10 border border-warning/20 mb-8">
+      <div className="p-4 rounded-lg bg-primary/10 border border-primary/20 mb-8">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+          <Terminal className="w-5 h-5 text-primary shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-foreground">Antes de começar</p>
+            <p className="text-sm font-medium text-foreground">Requisitos</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Certifique-se de ter um banco de dados PostgreSQL pronto e acessível a partir deste servidor.
+              Docker 20.10+ e Docker Compose 2.0+ instalados no servidor.
             </p>
           </div>
         </div>
@@ -190,6 +197,121 @@ function WelcomeStep() {
         Iniciar Configuração
         <ChevronRight className="w-4 h-4 ml-2" />
       </Button>
+    </div>
+  );
+}
+
+function DeployTypeStep() {
+  const { nextStep, prevStep, config, updateConfig } = useSetupStore();
+  const [deployType, setDeployType] = useState<'docker-full' | 'docker-external-db'>('docker-full');
+
+  const handleNext = () => {
+    // Store deploy type in config for later use
+    updateConfig('server', { ...config.server!, deployType } as any);
+    nextStep();
+  };
+
+  return (
+    <div className="animate-fade-in">
+      <h2 className="text-2xl font-semibold text-foreground mb-2">Tipo de Instalação</h2>
+      <p className="text-muted-foreground mb-8">
+        Escolha como deseja instalar o API Bridge no seu servidor.
+      </p>
+
+      <div className="space-y-4 mb-8">
+        <button
+          onClick={() => setDeployType('docker-full')}
+          className={`w-full text-left gradient-card border rounded-lg p-5 transition-all ${
+            deployType === 'docker-full' 
+              ? 'border-primary ring-2 ring-primary/20' 
+              : 'border-border hover:border-primary/50'
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+              deployType === 'docker-full' ? 'bg-primary text-primary-foreground' : 'bg-primary/20'
+            }`}>
+              <Container className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-medium text-foreground">Docker Completo (Recomendado)</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Inclui PostgreSQL no container. Ideal para instalações novas e VPS.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="text-xs px-2 py-0.5 rounded bg-success/20 text-success">Mais Simples</span>
+                <span className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary">Tudo Incluso</span>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setDeployType('docker-external-db')}
+          className={`w-full text-left gradient-card border rounded-lg p-5 transition-all ${
+            deployType === 'docker-external-db' 
+              ? 'border-primary ring-2 ring-primary/20' 
+              : 'border-border hover:border-primary/50'
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+              deployType === 'docker-external-db' ? 'bg-primary text-primary-foreground' : 'bg-primary/20'
+            }`}>
+              <Database className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-medium text-foreground">Docker + PostgreSQL Externo</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Use seu banco PostgreSQL existente (RDS, Cloud SQL, etc).
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="text-xs px-2 py-0.5 rounded bg-warning/20 text-warning">Avançado</span>
+                <span className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary">Banco Externo</span>
+              </div>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {deployType === 'docker-full' && (
+        <div className="p-4 rounded-lg bg-success/10 border border-success/20 mb-6">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Instalação Mais Simples</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                O PostgreSQL será instalado automaticamente via Docker. Você só precisa definir a senha.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deployType === 'docker-external-db' && (
+        <div className="p-4 rounded-lg bg-warning/10 border border-warning/20 mb-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Configuração Necessária</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Você precisará informar as credenciais do seu banco PostgreSQL existente.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex justify-between mt-8 pt-6 border-t border-border">
+        <Button variant="outline" onClick={prevStep}>
+          <ChevronLeft className="w-4 h-4 mr-2" />
+          Voltar
+        </Button>
+        <Button onClick={handleNext}>
+          Continuar
+          <ChevronRight className="w-4 h-4 ml-2" />
+        </Button>
+      </div>
     </div>
   );
 }
@@ -676,34 +798,156 @@ function ServerStep() {
 
 function FinishStep() {
   const { config, prevStep, completeSetup } = useSetupStore();
+  const [copied, setCopied] = useState<string | null>(null);
 
-  const envContent = `# Configuração do API Bridge
-# Gerado em: ${new Date().toISOString()}
+  const isDockerFull = (config.server as any)?.deployType !== 'docker-external-db';
 
-# Banco de Dados
-DATABASE_HOST=${config.database?.host || 'localhost'}
-DATABASE_PORT=${config.database?.port || 5432}
-DATABASE_NAME=${config.database?.database || 'apibridge'}
-DATABASE_USER=${config.database?.username || 'postgres'}
+  const envContent = `# ===========================================
+# API Bridge - Variáveis de Ambiente
+# ===========================================
+# Gerado em: ${new Date().toLocaleString('pt-BR')}
+
+# ==========================================
+# BANCO DE DADOS
+# ==========================================
+DATABASE_USER=${config.database?.username || 'apibridge'}
 DATABASE_PASSWORD=${config.database?.password || ''}
-DATABASE_SSL=${config.database?.ssl || false}
+DATABASE_NAME=${config.database?.database || 'apibridge'}
+${!isDockerFull ? `DATABASE_HOST=${config.database?.host || 'localhost'}
+DATABASE_PORT=${config.database?.port || 5432}
+DATABASE_SSL=${config.database?.ssl || false}` : '# Usando PostgreSQL do Docker (host: postgres)'}
 
-# Segurança (MANTENHA ESTES SEGREDOS!)
+# ==========================================
+# SEGURANÇA (NÃO COMPARTILHE!)
+# ==========================================
 MASTER_KEY=${config.security?.masterKey || ''}
 JWT_SECRET=${config.security?.jwtSecret || ''}
 SESSION_SECRET=${config.security?.sessionSecret || ''}
 
-# Servidor
+# ==========================================
+# ADMINISTRADOR
+# ==========================================
+ADMIN_EMAIL=${config.admin?.email || ''}
+ADMIN_PASSWORD=${config.admin?.password || ''}
+
+# ==========================================
+# SERVIDOR
+# ==========================================
 PORT=${config.server?.port || 3000}
 BASE_URL=${config.server?.baseUrl || ''}
 RATE_LIMIT_PER_MIN=${config.server?.rateLimitPerMin || 60}
 UPSTREAM_TIMEOUT_MS=${config.server?.upstreamTimeoutMs || 15000}
 CORS_ORIGINS=${config.server?.corsOrigins?.join(',') || ''}
-
-# Admin (apenas configuração inicial)
-ADMIN_EMAIL=${config.admin?.email || ''}
-ADMIN_PASSWORD=${config.admin?.password || ''}
 `;
+
+  const dockerComposeContent = isDockerFull ? `# docker-compose.yml - API Bridge
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: apibridge-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: \${DATABASE_USER}
+      POSTGRES_PASSWORD: \${DATABASE_PASSWORD}
+      POSTGRES_DB: \${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \${DATABASE_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  apibridge:
+    build: .
+    container_name: apibridge-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "\${PORT:-3000}:3000"
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: \${DATABASE_NAME}
+      DATABASE_USER: \${DATABASE_USER}
+      DATABASE_PASSWORD: \${DATABASE_PASSWORD}
+      DATABASE_SSL: "false"
+      MASTER_KEY: \${MASTER_KEY}
+      JWT_SECRET: \${JWT_SECRET}
+      SESSION_SECRET: \${SESSION_SECRET}
+      PORT: 3000
+      BASE_URL: \${BASE_URL}
+      RATE_LIMIT_PER_MIN: \${RATE_LIMIT_PER_MIN}
+      UPSTREAM_TIMEOUT_MS: \${UPSTREAM_TIMEOUT_MS}
+      CORS_ORIGINS: \${CORS_ORIGINS}
+      ADMIN_EMAIL: \${ADMIN_EMAIL}
+      ADMIN_PASSWORD: \${ADMIN_PASSWORD}
+    volumes:
+      - app_data:/app/data
+
+volumes:
+  postgres_data:
+  app_data:
+` : `# docker-compose.yml - API Bridge (Banco Externo)
+version: '3.8'
+
+services:
+  apibridge:
+    build: .
+    container_name: apibridge-app
+    restart: unless-stopped
+    ports:
+      - "\${PORT:-3000}:3000"
+    environment:
+      DATABASE_HOST: \${DATABASE_HOST}
+      DATABASE_PORT: \${DATABASE_PORT}
+      DATABASE_NAME: \${DATABASE_NAME}
+      DATABASE_USER: \${DATABASE_USER}
+      DATABASE_PASSWORD: \${DATABASE_PASSWORD}
+      DATABASE_SSL: \${DATABASE_SSL}
+      MASTER_KEY: \${MASTER_KEY}
+      JWT_SECRET: \${JWT_SECRET}
+      SESSION_SECRET: \${SESSION_SECRET}
+      PORT: 3000
+      BASE_URL: \${BASE_URL}
+      RATE_LIMIT_PER_MIN: \${RATE_LIMIT_PER_MIN}
+      UPSTREAM_TIMEOUT_MS: \${UPSTREAM_TIMEOUT_MS}
+      CORS_ORIGINS: \${CORS_ORIGINS}
+      ADMIN_EMAIL: \${ADMIN_EMAIL}
+      ADMIN_PASSWORD: \${ADMIN_PASSWORD}
+    volumes:
+      - app_data:/app/data
+
+volumes:
+  app_data:
+`;
+
+  const installCommands = `# 1. Baixe os arquivos do projeto
+git clone https://github.com/seu-usuario/api-bridge.git
+cd api-bridge
+
+# 2. Crie o arquivo .env com as variáveis acima
+nano .env
+
+# 3. Inicie os containers
+docker compose up -d
+
+# 4. Verifique os logs
+docker compose logs -f
+
+# 5. Acesse o painel
+# http://localhost:${config.server?.port || 3000}
+`;
+
+  const handleCopy = (content: string, name: string) => {
+    navigator.clipboard.writeText(content);
+    setCopied(name);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   return (
     <div className="animate-fade-in">
@@ -713,18 +957,28 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
         </div>
         <div>
           <h2 className="text-2xl font-semibold text-foreground">Configuração Concluída</h2>
-          <p className="text-muted-foreground">Seu API Bridge está pronto para uso</p>
+          <p className="text-muted-foreground">Seu API Bridge está pronto para deploy</p>
         </div>
       </div>
 
       <div className="space-y-6">
+        {/* Resumo */}
         <div className="gradient-card border border-border rounded-lg p-5">
           <h3 className="font-medium text-foreground mb-3">Resumo da Configuração</h3>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
+              <dt className="text-muted-foreground">Tipo de Deploy</dt>
+              <dd className="text-foreground">
+                {isDockerFull ? 'Docker Completo (com PostgreSQL)' : 'Docker + Banco Externo'}
+              </dd>
+            </div>
+            <div className="flex justify-between">
               <dt className="text-muted-foreground">Banco de Dados</dt>
-              <dd className="text-foreground font-mono">
-                {config.database?.host}:{config.database?.port}/{config.database?.database}
+              <dd className="text-foreground font-mono text-xs">
+                {isDockerFull 
+                  ? `postgres:5432/${config.database?.database}` 
+                  : `${config.database?.host}:${config.database?.port}/${config.database?.database}`
+                }
               </dd>
             </div>
             <div className="flex justify-between">
@@ -732,48 +986,119 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
               <dd className="text-foreground">{config.admin?.email}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Porta do Servidor</dt>
+              <dt className="text-muted-foreground">Porta</dt>
               <dd className="text-foreground">{config.server?.port}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-muted-foreground">Limite de Requisições</dt>
-              <dd className="text-foreground">{config.server?.rateLimitPerMin} req/min</dd>
             </div>
           </dl>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium text-foreground">Variáveis de Ambiente</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                navigator.clipboard.writeText(envContent);
-              }}
-            >
-              <Copy className="w-3 h-3 mr-1" />
-              Copiar .env
-            </Button>
-          </div>
-          <div className="rounded-lg bg-secondary/50 border border-border p-4 max-h-64 overflow-y-auto">
-            <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
-              {envContent}
-            </pre>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Salve isso como arquivo <code className="text-foreground">.env</code> no diretório do seu servidor.
-          </p>
+        {/* Tabs com arquivos */}
+        <Tabs defaultValue="env" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="env" className="text-xs">
+              <FileCode className="w-3 h-3 mr-1" />
+              .env
+            </TabsTrigger>
+            <TabsTrigger value="compose" className="text-xs">
+              <Container className="w-3 h-3 mr-1" />
+              docker-compose.yml
+            </TabsTrigger>
+            <TabsTrigger value="commands" className="text-xs">
+              <Terminal className="w-3 h-3 mr-1" />
+              Comandos
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="env" className="mt-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">Arquivo .env</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopy(envContent, 'env')}
+                >
+                  {copied === 'env' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+                  {copied === 'env' ? 'Copiado!' : 'Copiar'}
+                </Button>
+              </div>
+              <div className="rounded-lg bg-secondary/50 border border-border p-4 max-h-64 overflow-y-auto">
+                <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+                  {envContent}
+                </pre>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="compose" className="mt-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">docker-compose.yml</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopy(dockerComposeContent, 'compose')}
+                >
+                  {copied === 'compose' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+                  {copied === 'compose' ? 'Copiado!' : 'Copiar'}
+                </Button>
+              </div>
+              <div className="rounded-lg bg-secondary/50 border border-border p-4 max-h-64 overflow-y-auto">
+                <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+                  {dockerComposeContent}
+                </pre>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="commands" className="mt-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">Comandos de Instalação</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopy(installCommands, 'commands')}
+                >
+                  {copied === 'commands' ? <CheckCircle2 className="w-3 h-3 mr-1" /> : <Copy className="w-3 h-3 mr-1" />}
+                  {copied === 'commands' ? 'Copiado!' : 'Copiar'}
+                </Button>
+              </div>
+              <div className="rounded-lg bg-secondary/50 border border-border p-4 max-h-64 overflow-y-auto">
+                <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+                  {installCommands}
+                </pre>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Próximos passos */}
+        <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+          <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+            <Terminal className="w-4 h-4" />
+            Próximos Passos
+          </h4>
+          <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
+            <li>Copie o arquivo <code className="text-primary">.env</code> para seu servidor</li>
+            <li>Copie o <code className="text-primary">docker-compose.yml</code> para o mesmo diretório</li>
+            <li>Execute <code className="text-primary">docker compose up -d</code></li>
+            <li>Acesse o painel e crie sua primeira conexão</li>
+          </ol>
         </div>
 
-        <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-          <h4 className="font-medium text-foreground mb-2">Próximos Passos</h4>
-          <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
-            <li>Salve as variáveis de ambiente no seu servidor</li>
-            <li>Inicie o serviço de backend do API Bridge</li>
-            <li>Crie sua primeira conexão de API</li>
-            <li>Gere tokens de cliente para suas aplicações</li>
-          </ol>
+        {/* Aviso de segurança */}
+        <div className="p-4 rounded-lg bg-warning/10 border border-warning/20">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-foreground">Importante</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Guarde as chaves de segurança em local seguro. Se você perder a Chave Mestra, 
+                as credenciais criptografadas não poderão ser recuperadas.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -784,7 +1109,7 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
         </Button>
         <Button onClick={completeSetup}>
           <Check className="w-4 h-4 mr-2" />
-          Concluir Configuração
+          Concluir e Acessar Painel
         </Button>
       </div>
     </div>

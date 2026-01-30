@@ -27,6 +27,7 @@ export interface ServerConfig {
   corsOrigins: string[];
   rateLimitPerMin: number;
   upstreamTimeoutMs: number;
+  deployType?: 'docker-full' | 'docker-external-db';
 }
 
 export interface SetupConfig {
