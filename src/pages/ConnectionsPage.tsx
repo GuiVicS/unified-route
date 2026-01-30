@@ -5,6 +5,7 @@ import { useConnectionStore } from '@/stores/connectionStore';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CopyField } from '@/components/ui/copy-button';
 import { 
   Plus, 
   MoreVertical, 
@@ -19,7 +20,10 @@ import {
   Globe,
   ArrowLeft,
   ShoppingBag,
-  Brain
+  Brain,
+  Copy,
+  Check,
+  Lightbulb
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -34,6 +38,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -55,6 +60,30 @@ import { ptBR } from 'date-fns/locale';
 
 type CreateMode = 'select' | 'yampi' | 'shopify' | 'openai' | 'generic';
 
+function CopyIdButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  
+  const copy = async () => {
+    await navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      onClick={copy}
+      className="p-0.5 rounded hover:bg-secondary transition-colors"
+      title="Copiar ID"
+    >
+      {copied ? (
+        <Check className="w-3 h-3 text-success" />
+      ) : (
+        <Copy className="w-3 h-3 text-muted-foreground" />
+      )}
+    </button>
+  );
+}
+
 export function ConnectionsPage() {
   const { 
     connections, 
@@ -73,6 +102,7 @@ export function ConnectionsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [testingId, setTestingId] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<{ id: string; success: boolean; latencyMs: number; error?: string } | null>(null);
+  const [createdConnection, setCreatedConnection] = useState<Connection | null>(null);
 
   const handleOpenCreate = () => {
     setCreateMode('select');
@@ -89,8 +119,11 @@ export function ConnectionsPage() {
   }, []);
 
   const handleCreate = async (data: ConnectionFormData) => {
-    await createConnection(data);
+    const newConnection = await createConnection(data);
     setIsCreateOpen(false);
+    if (newConnection) {
+      setCreatedConnection(newConnection);
+    }
   };
 
   const handleUpdate = async (data: ConnectionFormData) => {
@@ -305,6 +338,11 @@ export function ConnectionsPage() {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground font-mono mt-1">{conn.baseUrl}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-muted-foreground">ID:</span>
+                    <code className="text-xs font-mono text-primary bg-primary/10 px-1.5 py-0.5 rounded">{conn.id}</code>
+                    <CopyIdButton value={conn.id} />
+                  </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     Atualizada {formatDistanceToNow(new Date(conn.updatedAt), { addSuffix: true, locale: ptBR })}
                   </p>
@@ -441,6 +479,41 @@ export function ConnectionsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Success Dialog after creation */}
+      <Dialog open={!!createdConnection} onOpenChange={() => setCreatedConnection(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex items-center gap-2 text-success">
+              <CheckCircle2 className="w-5 h-5" />
+              <DialogTitle>Conexão Criada com Sucesso!</DialogTitle>
+            </div>
+            <DialogDescription>
+              A conexão <strong>{createdConnection?.name}</strong> foi criada.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <CopyField 
+              label="Connection ID (use nas requisições):" 
+              value={createdConnection?.id || ''} 
+            />
+            
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <Lightbulb className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                Use este ID no campo <code className="px-1 py-0.5 rounded bg-secondary text-foreground">connectionId</code> ao fazer requisições para <code className="px-1 py-0.5 rounded bg-secondary text-foreground">/api/proxy</code>
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setCreatedConnection(null)}>
+              Entendi, Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

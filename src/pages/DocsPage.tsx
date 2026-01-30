@@ -1001,6 +1001,44 @@ curl -X POST 'https://seu-apibridge.com/api/proxy' \\
         </AlertDescription>
       </Alert>
 
+      {/* Onde encontrar o Connection ID */}
+      <Card className="gradient-card border-primary/30 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="w-5 h-5 text-primary" />
+            Onde encontrar o Connection ID?
+          </CardTitle>
+          <CardDescription>
+            O Connection ID é necessário em todas as requisições para o proxy
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs shrink-0">1</div>
+            <p className="text-sm text-muted-foreground">
+              Acesse a página <strong>Conexões</strong> no menu lateral
+            </p>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs shrink-0">2</div>
+            <p className="text-sm text-muted-foreground">
+              Cada conexão exibe seu ID no formato <code className="px-1 py-0.5 rounded bg-secondary">conn-1738257600000</code>
+            </p>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary font-semibold text-xs shrink-0">3</div>
+            <p className="text-sm text-muted-foreground">
+              Clique no ícone <Copy className="w-3 h-3 inline" /> ao lado do ID para copiá-lo
+            </p>
+          </div>
+          <div className="mt-4 p-3 rounded-lg bg-secondary/50 border border-border">
+            <p className="text-xs text-muted-foreground">
+              💡 <strong>Dica:</strong> Ao criar uma nova conexão, o ID é exibido automaticamente em um dialog de sucesso para fácil cópia.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Estrutura da Requisição */}
       <Card className="gradient-card border-border">
         <CardHeader>
@@ -1021,7 +1059,7 @@ Headers:
 
 Body:
 {
-  "connectionId": "conn-xxx",     // ID da conexão configurada
+  "connectionId": "conn-xxx",     // ID da conexão (copie da página Conexões)
   "method": "GET|POST|PUT|PATCH|DELETE",
   "path": "/endpoint",            // Path relativo à URL base
   "query": { "key": "value" },    // Query params (opcional)
