@@ -1,15 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export interface DatabaseConfig {
-  host: string;
-  port: number;
-  database: string;
-  username: string;
-  password: string;
-  ssl: boolean;
-}
-
 export interface AdminConfig {
   email: string;
   password: string;
@@ -27,11 +18,9 @@ export interface ServerConfig {
   corsOrigins: string[];
   rateLimitPerMin: number;
   upstreamTimeoutMs: number;
-  deployType?: 'docker-full' | 'docker-external-db';
 }
 
 export interface SetupConfig {
-  database: DatabaseConfig;
   admin: AdminConfig;
   security: SecurityConfig;
   server: ServerConfig;
@@ -42,17 +31,11 @@ interface SetupStore {
   isSetupComplete: boolean;
   currentStep: number;
   config: Partial<SetupConfig>;
-  connectionStatus: 'idle' | 'testing' | 'success' | 'error';
-  connectionError?: string;
-  migrationStatus: 'idle' | 'running' | 'success' | 'error';
-  migrationError?: string;
   
   setStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
   updateConfig: <K extends keyof SetupConfig>(key: K, value: SetupConfig[K]) => void;
-  testDatabaseConnection: () => Promise<boolean>;
-  runMigrations: () => Promise<boolean>;
   completeSetup: () => void;
   resetSetup: () => void;
 }
@@ -70,18 +53,10 @@ const generateSecureKey = (length: number = 32): string => {
 
 export const useSetupStore = create<SetupStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       isSetupComplete: false,
       currentStep: 0,
       config: {
-        database: {
-          host: 'localhost',
-          port: 5432,
-          database: 'apibridge',
-          username: 'postgres',
-          password: '',
-          ssl: false,
-        },
         server: {
           baseUrl: '',
           port: 3000,
@@ -95,8 +70,6 @@ export const useSetupStore = create<SetupStore>()(
           sessionSecret: generateSecureKey(32),
         },
       },
-      connectionStatus: 'idle',
-      migrationStatus: 'idle',
 
       setStep: (step) => set({ currentStep: step }),
       
@@ -107,40 +80,6 @@ export const useSetupStore = create<SetupStore>()(
       updateConfig: (key, value) => set(state => ({
         config: { ...state.config, [key]: value }
       })),
-
-      testDatabaseConnection: async () => {
-        set({ connectionStatus: 'testing', connectionError: undefined });
-        
-        // Simulate connection test - in real backend this would actually connect
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        const { config } = get();
-        if (!config.database?.host || !config.database?.password) {
-          set({ connectionStatus: 'error', connectionError: 'Host and password are required' });
-          return false;
-        }
-        
-        // Simulate success/failure based on valid-looking config
-        const success = config.database.host.length > 0 && config.database.password.length >= 4;
-        
-        if (success) {
-          set({ connectionStatus: 'success' });
-          return true;
-        } else {
-          set({ connectionStatus: 'error', connectionError: 'Could not connect to database. Check credentials.' });
-          return false;
-        }
-      },
-
-      runMigrations: async () => {
-        set({ migrationStatus: 'running', migrationError: undefined });
-        
-        // Simulate migration
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        set({ migrationStatus: 'success' });
-        return true;
-      },
 
       completeSetup: () => set(state => ({
         isSetupComplete: true,
@@ -153,9 +92,20 @@ export const useSetupStore = create<SetupStore>()(
       resetSetup: () => set({
         isSetupComplete: false,
         currentStep: 0,
-        config: {},
-        connectionStatus: 'idle',
-        migrationStatus: 'idle',
+        config: {
+          server: {
+            baseUrl: '',
+            port: 3000,
+            corsOrigins: [],
+            rateLimitPerMin: 60,
+            upstreamTimeoutMs: 15000,
+          },
+          security: {
+            masterKey: generateSecureKey(32),
+            jwtSecret: generateSecureKey(64),
+            sessionSecret: generateSecureKey(32),
+          },
+        },
       }),
     }),
     {
