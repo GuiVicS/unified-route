@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { useSetupStore } from "@/stores/setupStore";
+import { SetupWizard } from "@/components/setup/SetupWizard";
 import { LoginPage } from "@/pages/LoginPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { ConnectionsPage } from "@/pages/ConnectionsPage";
@@ -32,20 +34,28 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function AppRoutes() {
+function AppContent() {
+  const { isSetupComplete } = useSetupStore();
   const { user } = useAuth();
-  
+
+  // Show setup wizard if not configured
+  if (!isSetupComplete) {
+    return <SetupWizard />;
+  }
+
   return (
-    <Routes>
-      <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-      <Route path="/connections" element={<ProtectedRoute><ConnectionsPage /></ProtectedRoute>} />
-      <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
-      <Route path="/security" element={<ProtectedRoute><SecurityPage /></ProtectedRoute>} />
-      <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/connections" element={<ProtectedRoute><ConnectionsPage /></ProtectedRoute>} />
+        <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
+        <Route path="/security" element={<ProtectedRoute><SecurityPage /></ProtectedRoute>} />
+        <Route path="/logs" element={<ProtectedRoute><LogsPage /></ProtectedRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
@@ -55,9 +65,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <AppContent />
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

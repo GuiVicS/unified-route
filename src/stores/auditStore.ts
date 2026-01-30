@@ -1,48 +1,6 @@
 import { create } from 'zustand';
 import type { AuditLog, HttpMethod } from '@/types/api-bridge';
-
-const generateDemoLogs = (): AuditLog[] => {
-  const logs: AuditLog[] = [];
-  const connections = [
-    { id: 'conn-001', name: 'OpenAI Production' },
-    { id: 'conn-002', name: 'Dooki Saoko' },
-  ];
-  const clients = [
-    { id: 'client-001', name: 'Lovable Frontend' },
-    { id: 'client-002', name: 'Support Panel' },
-  ];
-  const methods: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH'];
-  const paths = ['/chat/completions', '/orders', '/customers', '/products', '/embeddings'];
-  const statuses = [200, 200, 200, 200, 200, 201, 204, 400, 401, 500];
-
-  for (let i = 0; i < 50; i++) {
-    const conn = connections[Math.floor(Math.random() * connections.length)];
-    const client = clients[Math.floor(Math.random() * clients.length)];
-    const method = methods[Math.floor(Math.random() * methods.length)];
-    const path = paths[Math.floor(Math.random() * paths.length)];
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-    
-    const timestamp = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-    
-    logs.push({
-      id: `log-${i}`,
-      timestamp: timestamp.toISOString(),
-      connectionId: conn.id,
-      connectionName: conn.name,
-      clientId: client.id,
-      clientName: client.name,
-      method,
-      host: conn.id === 'conn-001' ? 'api.openai.com' : 'api.dooki.com.br',
-      path,
-      status,
-      latencyMs: Math.floor(50 + Math.random() * 500),
-      responseSize: Math.floor(100 + Math.random() * 10000),
-      ipAddress: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-    });
-  }
-
-  return logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-};
+import { useSetupStore } from './setupStore';
 
 interface AuditFilters {
   connectionId?: string;
@@ -56,6 +14,7 @@ interface AuditFilters {
 interface AuditStore {
   logs: AuditLog[];
   isLoading: boolean;
+  error: string | null;
   filters: AuditFilters;
   fetchLogs: () => Promise<void>;
   setFilters: (filters: AuditFilters) => void;
@@ -65,12 +24,24 @@ interface AuditStore {
 export const useAuditStore = create<AuditStore>((set, get) => ({
   logs: [],
   isLoading: false,
+  error: null,
   filters: {},
 
   fetchLogs: async () => {
-    set({ isLoading: true });
-    await new Promise(resolve => setTimeout(resolve, 600));
-    set({ logs: generateDemoLogs(), isLoading: false });
+    const { isSetupComplete } = useSetupStore.getState();
+    if (!isSetupComplete) {
+      set({ logs: [], isLoading: false });
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    
+    try {
+      // In production: GET /api/audit-logs
+      set({ logs: [], isLoading: false });
+    } catch (error) {
+      set({ error: 'Failed to fetch logs', isLoading: false });
+    }
   },
 
   setFilters: (filters: AuditFilters) => {

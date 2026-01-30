@@ -1,53 +1,11 @@
 import { create } from 'zustand';
 import type { Connection, ConnectionFormData } from '@/types/api-bridge';
-
-// Demo data
-const demoConnections: Connection[] = [
-  {
-    id: 'conn-001',
-    name: 'OpenAI Production',
-    providerType: 'OPENAI',
-    baseUrl: 'https://api.openai.com/v1',
-    authScheme: 'BEARER',
-    hasCredentials: true,
-    allowedHosts: ['api.openai.com'],
-    allowedPathPrefixes: ['/chat', '/completions', '/embeddings'],
-    allowedMethods: ['GET', 'POST'],
-    enabled: true,
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-20T14:22:00Z',
-  },
-  {
-    id: 'conn-002',
-    name: 'Dooki Saoko',
-    providerType: 'DOOKI',
-    baseUrl: 'https://api.dooki.com.br/v2/saoko',
-    authScheme: 'HEADER_PAIR',
-    hasCredentials: true,
-    allowedHosts: ['api.dooki.com.br'],
-    allowedPathPrefixes: ['/orders', '/customers', '/products'],
-    allowedMethods: ['GET', 'POST', 'PUT', 'PATCH'],
-    enabled: true,
-    createdAt: '2024-01-10T08:15:00Z',
-    updatedAt: '2024-01-18T16:45:00Z',
-  },
-  {
-    id: 'conn-003',
-    name: 'Internal CRM API',
-    providerType: 'GENERIC',
-    baseUrl: 'https://crm.internal.company.com/api',
-    authScheme: 'BEARER',
-    hasCredentials: true,
-    allowedMethods: ['GET', 'POST', 'PUT'],
-    enabled: false,
-    createdAt: '2024-01-05T12:00:00Z',
-    updatedAt: '2024-01-05T12:00:00Z',
-  },
-];
+import { useSetupStore } from './setupStore';
 
 interface ConnectionStore {
   connections: Connection[];
   isLoading: boolean;
+  error: string | null;
   fetchConnections: () => Promise<void>;
   createConnection: (data: ConnectionFormData) => Promise<Connection>;
   updateConnection: (id: string, data: Partial<ConnectionFormData>) => Promise<Connection>;
@@ -59,15 +17,31 @@ interface ConnectionStore {
 export const useConnectionStore = create<ConnectionStore>((set, get) => ({
   connections: [],
   isLoading: false,
+  error: null,
 
   fetchConnections: async () => {
-    set({ isLoading: true });
-    await new Promise(resolve => setTimeout(resolve, 500));
-    set({ connections: demoConnections, isLoading: false });
+    const { isSetupComplete } = useSetupStore.getState();
+    if (!isSetupComplete) {
+      set({ connections: [], isLoading: false });
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    
+    try {
+      // In production, this would be an API call
+      // const response = await fetch('/api/connections');
+      // const data = await response.json();
+      
+      // For now, return empty - data comes from real backend
+      set({ connections: [], isLoading: false });
+    } catch (error) {
+      set({ error: 'Failed to fetch connections', isLoading: false });
+    }
   },
 
   createConnection: async (data: ConnectionFormData) => {
-    await new Promise(resolve => setTimeout(resolve, 600));
+    // In production: POST /api/connections
     const newConnection: Connection = {
       id: `conn-${Date.now()}`,
       name: data.name,
@@ -83,13 +57,14 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
+    
     set(state => ({ connections: [...state.connections, newConnection] }));
     return newConnection;
   },
 
   updateConnection: async (id: string, data: Partial<ConnectionFormData>) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
     let updated: Connection | undefined;
+    
     set(state => ({
       connections: state.connections.map(conn => {
         if (conn.id === id) {
@@ -104,19 +79,18 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
         return conn;
       }),
     }));
+    
     if (!updated) throw new Error('Connection not found');
     return updated;
   },
 
   deleteConnection: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
     set(state => ({
       connections: state.connections.filter(conn => conn.id !== id),
     }));
   },
 
   toggleConnection: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, 200));
     set(state => ({
       connections: state.connections.map(conn =>
         conn.id === id ? { ...conn, enabled: !conn.enabled, updatedAt: new Date().toISOString() } : conn
@@ -125,7 +99,9 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
   },
 
   testConnection: async (id: string) => {
+    // In production: POST /api/connections/:id/test
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+    
     const success = Math.random() > 0.2;
     return {
       success,

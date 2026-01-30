@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Client, ClientFormData, ClientWithToken } from '@/types/api-bridge';
+import { useSetupStore } from './setupStore';
 
 const generateToken = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -10,35 +11,10 @@ const generateToken = () => {
   return token;
 };
 
-const demoClients: Client[] = [
-  {
-    id: 'client-001',
-    name: 'Lovable Frontend',
-    allowedOrigins: ['https://lovable.app', 'https://*.lovable.app'],
-    allowedConnectionIds: ['conn-001', 'conn-002'],
-    enabled: true,
-    createdAt: '2024-01-12T09:00:00Z',
-    lastUsedAt: '2024-01-25T18:32:00Z',
-  },
-  {
-    id: 'client-002',
-    name: 'Support Panel',
-    allowedOrigins: ['https://support.company.com'],
-    enabled: true,
-    createdAt: '2024-01-14T11:20:00Z',
-    lastUsedAt: '2024-01-24T14:15:00Z',
-  },
-  {
-    id: 'client-003',
-    name: 'Mobile App Backend',
-    enabled: false,
-    createdAt: '2024-01-08T16:45:00Z',
-  },
-];
-
 interface ClientStore {
   clients: Client[];
   isLoading: boolean;
+  error: string | null;
   fetchClients: () => Promise<void>;
   createClient: (data: ClientFormData) => Promise<ClientWithToken>;
   updateClient: (id: string, data: Partial<ClientFormData>) => Promise<Client>;
@@ -50,15 +26,26 @@ interface ClientStore {
 export const useClientStore = create<ClientStore>((set) => ({
   clients: [],
   isLoading: false,
+  error: null,
 
   fetchClients: async () => {
-    set({ isLoading: true });
-    await new Promise(resolve => setTimeout(resolve, 400));
-    set({ clients: demoClients, isLoading: false });
+    const { isSetupComplete } = useSetupStore.getState();
+    if (!isSetupComplete) {
+      set({ clients: [], isLoading: false });
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+    
+    try {
+      // In production: GET /api/clients
+      set({ clients: [], isLoading: false });
+    } catch (error) {
+      set({ error: 'Failed to fetch clients', isLoading: false });
+    }
   },
 
   createClient: async (data: ClientFormData) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
     const token = generateToken();
     const newClient: ClientWithToken = {
       id: `client-${Date.now()}`,
@@ -69,15 +56,17 @@ export const useClientStore = create<ClientStore>((set) => ({
       createdAt: new Date().toISOString(),
       token,
     };
+    
     set(state => ({ 
       clients: [...state.clients, { ...newClient, token: undefined } as Client] 
     }));
+    
     return newClient;
   },
 
   updateClient: async (id: string, data: Partial<ClientFormData>) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
     let updated: Client | undefined;
+    
     set(state => ({
       clients: state.clients.map(client => {
         if (client.id === id) {
@@ -87,19 +76,18 @@ export const useClientStore = create<ClientStore>((set) => ({
         return client;
       }),
     }));
+    
     if (!updated) throw new Error('Client not found');
     return updated;
   },
 
   deleteClient: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, 300));
     set(state => ({
       clients: state.clients.filter(client => client.id !== id),
     }));
   },
 
   toggleClient: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, 200));
     set(state => ({
       clients: state.clients.map(client =>
         client.id === id ? { ...client, enabled: !client.enabled } : client
@@ -108,7 +96,6 @@ export const useClientStore = create<ClientStore>((set) => ({
   },
 
   regenerateToken: async (id: string) => {
-    await new Promise(resolve => setTimeout(resolve, 400));
     return generateToken();
   },
 }));

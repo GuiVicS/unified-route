@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSetupStore } from '@/stores/setupStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Zap, AlertCircle, Loader2 } from 'lucide-react';
+import { Zap, AlertCircle, Loader2, Settings } from 'lucide-react';
 
 export function LoginPage() {
   const { login } = useAuth();
+  const { resetSetup } = useSetupStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +22,7 @@ export function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError('Invalid credentials. Try: admin@apibridge.local / admin123');
+      setError('Invalid credentials');
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +47,7 @@ export function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@apibridge.local"
+              placeholder="admin@yourcompany.com"
               required
               autoComplete="email"
             />
@@ -83,9 +85,16 @@ export function LoginPage() {
           </Button>
         </form>
 
-        <p className="text-xs text-muted-foreground text-center mt-6">
-          Demo credentials: admin@apibridge.local / admin123
-        </p>
+        <div className="mt-6 pt-6 border-t border-border">
+          <Button 
+            variant="ghost" 
+            className="w-full text-muted-foreground"
+            onClick={resetSetup}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Run Setup Again
+          </Button>
+        </div>
       </div>
     </div>
   );
