@@ -1,133 +1,129 @@
 
+# Plano: Corrigir Dockerfile para EasyPanel
 
-# Plano: Página de Documentação de Instalação
+## Problema Identificado
 
-## Objetivo
-Criar uma nova página `/docs` no painel administrativo com instruções detalhadas de instalação para três plataformas:
-- EasyPanel
-- Docker Compose
-- VPS (instalação manual)
+O erro "Bad Request" no EasyPanel é causado por dois problemas:
 
-## Estrutura da Página
+1. **CMD inline muito complexo**: O Dockerfile atual usa um servidor Node.js inline no comando `CMD` com muitas barras invertidas (`\`), o que pode causar problemas de parsing no Docker buildx
+2. **`.dockerignore` incorreto**: Está ignorando a pasta `docker/` e arquivos `Dockerfile*`, o que pode interferir no build
 
-A página utilizará o componente de abas (Tabs) para organizar o conteúdo por plataforma, com:
-- Navegação clara entre os métodos de instalação
-- Blocos de código com botão de copiar
-- Instruções passo a passo numeradas
-- Seção de troubleshooting para cada plataforma
+## Solução
 
----
+### Parte 1: Criar arquivo de servidor separado
 
-## Arquivos a Criar/Modificar
+Criar um arquivo `serve.js` na raiz do projeto (fora da pasta `docker/`) que será copiado durante o build.
 
-### 1. Nova Página: `src/pages/DocsPage.tsx`
-
-Página principal de documentação contendo:
-
-**Cabeçalho:**
-- Título: "Documentação de Instalação"
-- Descrição: "Guia passo a passo para instalar o API Bridge"
-
-**Tabs de Conteúdo:**
-- **EasyPanel** - Instalação via painel de controle
-- **Docker Compose** - Instalação com docker-compose.yml
-- **VPS Manual** - Instalação direta em servidor Linux
-
-**Cada aba conterá:**
-- Requisitos mínimos
-- Passos numerados com screenshots conceituais (ícones)
-- Blocos de código para comandos e configurações
-- Variáveis de ambiente necessárias
-- Dicas de segurança
-- Troubleshooting comum
-
-### 2. Componente: `src/components/docs/CodeBlock.tsx`
-
-Componente reutilizável para exibir código com:
-- Syntax highlighting simples (estilo terminal)
-- Botão "Copiar" integrado
-- Suporte a múltiplas linhas
-- Label opcional (ex: "docker-compose.yml", "Terminal")
-
-### 3. Atualização: `src/components/layout/Sidebar.tsx`
-
-Adicionar novo item de navegação:
-```
-{ path: '/docs', label: 'Documentação', icon: BookOpen }
+```text
+serve.js (novo arquivo)
+├── Servidor HTTP simples
+├── Suporte SPA (fallback para index.html)
+├── Health check em /health
+└── MIME types para assets
 ```
 
-### 4. Atualização: `src/App.tsx`
+### Parte 2: Simplificar o Dockerfile
 
-Adicionar nova rota:
-```tsx
-<Route path="/docs" element={<ProtectedRoute><DocsPage /></ProtectedRoute>} />
+Remover o servidor inline e usar o arquivo `serve.js`:
+
+```text
+Dockerfile (simplificado)
+├── FROM node:20-alpine
+├── COPY package*.json → npm ci
+├── COPY . → npm run build
+├── COPY serve.js
+└── CMD ["node", "serve.js"]
 ```
 
----
+### Parte 3: Ajustar o .dockerignore
 
-## Conteúdo da Documentação
+Remover a exclusão da pasta `docker/` e permitir arquivos necessários.
 
-### Aba: EasyPanel
+## Arquivos a Modificar
 
-1. Criar projeto no EasyPanel
-2. Adicionar serviço PostgreSQL
-3. Adicionar App (GitHub ou Docker Image)
-4. Configurar variáveis de ambiente
-5. Configurar domínio e SSL
-6. Acessar o assistente de instalação
-
-### Aba: Docker Compose
-
-1. Requisitos (Docker 20.10+, Docker Compose 2.0+)
-2. Clonar repositório
-3. Configurar arquivo .env
-4. Gerar chaves de segurança
-5. Subir containers
-6. Comandos úteis (logs, backup, restore)
-
-### Aba: VPS Manual
-
-1. Requisitos do servidor (Ubuntu 22.04+, Node 20+)
-2. Instalar dependências (Node.js, PostgreSQL)
-3. Clonar e configurar projeto
-4. Configurar banco de dados
-5. Configurar systemd ou PM2
-6. Configurar Nginx como proxy reverso
-7. Configurar SSL com Let's Encrypt
-
----
+| Arquivo | Ação | Descrição |
+|---------|------|-----------|
+| `serve.js` | Criar | Servidor estático simples |
+| `Dockerfile` | Editar | Simplificar CMD |
+| `.dockerignore` | Editar | Remover exclusões problemáticas |
 
 ## Detalhes Técnicos
 
-### Estrutura do CodeBlock
-```tsx
-interface CodeBlockProps {
-  code: string;
-  language?: string;
-  filename?: string;
-  showLineNumbers?: boolean;
-}
+### serve.js
+```javascript
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const PORT = process.env.PORT || 3000;
+const DIR = './dist';
+
+const MIME = {
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2'
+};
+
+http.createServer((req, res) => {
+  if (req.url === '/health') {
+    res.writeHead(200);
+    res.end('OK');
+    return;
+  }
+  
+  let file = path.join(DIR, req.url === '/' ? 'index.html' : req.url);
+  
+  fs.readFile(file, (err, data) => {
+    if (err) {
+      fs.readFile(path.join(DIR, 'index.html'), (e, d) => {
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.end(d);
+      });
+      return;
+    }
+    res.writeHead(200, {'Content-Type': MIME[path.extname(file)] || 'text/plain'});
+    res.end(data);
+  });
+}).listen(PORT, () => console.log('Server running on port ' + PORT));
 ```
 
-### Estilização
-- Fundo escuro para blocos de código (`bg-secondary/80`)
-- Fonte mono para comandos
-- Ícones lucide-react para passos visuais
-- Cards com `gradient-card` seguindo padrão existente
+### Dockerfile Corrigido
+```dockerfile
+FROM node:20-alpine
+WORKDIR /app
 
-### Componentes UI utilizados
-- `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
-- `ScrollArea` para conteúdo longo
-- `CopyButton` existente
-- `Badge` para destacar versões/requisitos
-- `Alert` para avisos importantes
+COPY package*.json ./
+RUN npm ci
 
----
+COPY . .
+RUN npm run build
 
-## Ordem de Implementação
+ENV NODE_ENV=production
+ENV PORT=3000
+EXPOSE 3000
 
-1. Criar `CodeBlock.tsx` - componente de código copiável
-2. Criar `DocsPage.tsx` - página completa com 3 abas
-3. Atualizar `Sidebar.tsx` - adicionar link de navegação
-4. Atualizar `App.tsx` - adicionar rota `/docs`
+CMD ["node", "serve.js"]
+```
 
+### .dockerignore Corrigido
+```text
+node_modules
+.git
+*.md
+.env*
+coverage
+.idea
+.vscode
+```
+
+## Após Aprovação
+
+1. Crio o arquivo `serve.js`
+2. Simplifico o `Dockerfile` 
+3. Ajusto o `.dockerignore`
+4. Você faz novo deploy no EasyPanel
