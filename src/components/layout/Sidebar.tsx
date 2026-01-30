@@ -14,11 +14,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/connections', label: 'Connections', icon: Link2 },
-  { path: '/clients', label: 'Clients', icon: Key },
-  { path: '/security', label: 'Security', icon: Shield },
-  { path: '/logs', label: 'Audit Logs', icon: FileText },
+  { path: '/dashboard', label: 'Painel', icon: LayoutDashboard },
+  { path: '/connections', label: 'Conexões', icon: Link2 },
+  { path: '/clients', label: 'Clientes', icon: Key },
+  { path: '/security', label: 'Segurança', icon: Shield },
+  { path: '/logs', label: 'Logs de Auditoria', icon: FileText },
 ];
 
 export function Sidebar() {
@@ -34,7 +34,7 @@ export function Sidebar() {
           </div>
           <div>
             <h1 className="text-lg font-semibold text-foreground">API Bridge</h1>
-            <p className="text-xs text-muted-foreground">Universal Proxy</p>
+            <p className="text-xs text-muted-foreground">Proxy Universal</p>
           </div>
         </Link>
       </div>
@@ -68,7 +68,7 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-sidebar-border space-y-4">
         <div className="px-3 py-2 rounded-lg bg-sidebar-accent/50">
-          <p className="text-xs text-muted-foreground">Logged in as</p>
+          <p className="text-xs text-muted-foreground">Logado como</p>
           <p className="text-sm font-medium text-foreground truncate">{user?.email}</p>
         </div>
         <Button 
@@ -77,7 +77,7 @@ export function Sidebar() {
           onClick={logout}
         >
           <LogOut className="w-4 h-4 mr-2" />
-          Sign out
+          Sair
         </Button>
       </div>
     </aside>

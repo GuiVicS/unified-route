@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import type { HttpMethod } from '@/types/api-bridge';
 
 export function LogsPage() {
@@ -40,12 +41,12 @@ export function LogsPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Audit Logs" 
-        description="Monitor all proxy requests"
+        title="Logs de Auditoria" 
+        description="Monitore todas as requisições de proxy"
         action={
           <Button variant="outline" onClick={() => fetchLogs()}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
+            Atualizar
           </Button>
         }
       />
@@ -57,10 +58,10 @@ export function LogsPage() {
           onValueChange={(v) => setFilters({ ...filters, connectionId: v === 'all' ? undefined : v })}
         >
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="All Connections" />
+            <SelectValue placeholder="Todas as Conexões" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Connections</SelectItem>
+            <SelectItem value="all">Todas as Conexões</SelectItem>
             {connections.map(conn => (
               <SelectItem key={conn.id} value={conn.id}>{conn.name}</SelectItem>
             ))}
@@ -72,10 +73,10 @@ export function LogsPage() {
           onValueChange={(v) => setFilters({ ...filters, clientId: v === 'all' ? undefined : v })}
         >
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="All Clients" />
+            <SelectValue placeholder="Todos os Clientes" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Clients</SelectItem>
+            <SelectItem value="all">Todos os Clientes</SelectItem>
             {clients.map(client => (
               <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
             ))}
@@ -87,10 +88,10 @@ export function LogsPage() {
           onValueChange={(v) => setFilters({ ...filters, method: v === 'all' ? undefined : v as HttpMethod })}
         >
           <SelectTrigger className="w-32">
-            <SelectValue placeholder="Method" />
+            <SelectValue placeholder="Método" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Methods</SelectItem>
+            <SelectItem value="all">Todos</SelectItem>
             <SelectItem value="GET">GET</SelectItem>
             <SelectItem value="POST">POST</SelectItem>
             <SelectItem value="PUT">PUT</SelectItem>
@@ -105,7 +106,7 @@ export function LogsPage() {
             size="sm"
             onClick={() => setFilters({})}
           >
-            Clear filters
+            Limpar filtros
           </Button>
         )}
       </div>
@@ -117,7 +118,7 @@ export function LogsPage() {
         </div>
       ) : filteredLogs.length === 0 ? (
         <div className="text-center py-12 gradient-card border border-border rounded-lg">
-          <p className="text-muted-foreground">No logs found</p>
+          <p className="text-muted-foreground">Nenhum log encontrado</p>
         </div>
       ) : (
         <div className="gradient-card border border-border rounded-lg overflow-hidden">
@@ -125,21 +126,21 @@ export function LogsPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border bg-secondary/30">
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Time</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Data/Hora</th>
                   <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Status</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Method</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Connection</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Método</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Conexão</th>
                   <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Path</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Client</th>
-                  <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Latency</th>
-                  <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Size</th>
+                  <th className="text-left text-xs font-medium text-muted-foreground px-4 py-3">Cliente</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Latência</th>
+                  <th className="text-right text-xs font-medium text-muted-foreground px-4 py-3">Tamanho</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredLogs.map(log => (
                   <tr key={log.id} className="border-b border-border last:border-0 table-row-hover">
                     <td className="px-4 py-3 text-xs text-muted-foreground font-mono">
-                      {format(new Date(log.timestamp), 'MMM dd HH:mm:ss')}
+                      {format(new Date(log.timestamp), "dd MMM HH:mm:ss", { locale: ptBR })}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={getStatusVariant(log.status) as any} className="font-mono text-xs">

@@ -24,12 +24,12 @@ import {
 import { CopyField } from '@/components/ui/copy-button';
 
 const STEPS = [
-  { id: 'welcome', title: 'Welcome', icon: Zap },
-  { id: 'database', title: 'Database', icon: Database },
-  { id: 'admin', title: 'Admin Account', icon: User },
-  { id: 'security', title: 'Security', icon: Shield },
-  { id: 'server', title: 'Server', icon: Server },
-  { id: 'finish', title: 'Finish', icon: Check },
+  { id: 'welcome', title: 'Bem-vindo', icon: Zap },
+  { id: 'database', title: 'Banco de Dados', icon: Database },
+  { id: 'admin', title: 'Conta Admin', icon: User },
+  { id: 'security', title: 'Segurança', icon: Shield },
+  { id: 'server', title: 'Servidor', icon: Server },
+  { id: 'finish', title: 'Finalizar', icon: Check },
 ];
 
 export function SetupWizard() {
@@ -59,7 +59,7 @@ export function SetupWizard() {
           </div>
           <div>
             <h1 className="text-lg font-semibold text-foreground">API Bridge</h1>
-            <p className="text-xs text-muted-foreground">Setup Wizard</p>
+            <p className="text-xs text-muted-foreground">Assistente de Instalação</p>
           </div>
         </div>
 
@@ -97,9 +97,9 @@ export function SetupWizard() {
 
         <div className="pt-6 border-t border-sidebar-border">
           <p className="text-xs text-muted-foreground">
-            Need help? Check the{' '}
+            Precisa de ajuda? Veja a{' '}
             <a href="#" className="text-primary hover:underline inline-flex items-center gap-1">
-              documentation <ExternalLink className="w-3 h-3" />
+              documentação <ExternalLink className="w-3 h-3" />
             </a>
           </p>
         </div>
@@ -125,9 +125,9 @@ function WelcomeStep() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-3xl font-semibold text-foreground mb-2">Welcome to API Bridge</h2>
+      <h2 className="text-3xl font-semibold text-foreground mb-2">Bem-vindo ao API Bridge</h2>
       <p className="text-muted-foreground mb-8">
-        Let's configure your universal API proxy. This wizard will guide you through the setup process.
+        Vamos configurar seu proxy universal de APIs. Este assistente irá guiá-lo pelo processo de instalação.
       </p>
 
       <div className="space-y-4 mb-8">
@@ -137,9 +137,9 @@ function WelcomeStep() {
               <Database className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-medium text-foreground">PostgreSQL Database</h3>
+              <h3 className="font-medium text-foreground">Banco de Dados PostgreSQL</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Connect to your PostgreSQL database where API Bridge will store connections, clients, and logs.
+                Conecte ao seu banco de dados PostgreSQL onde o API Bridge irá armazenar conexões, clientes e logs.
               </p>
             </div>
           </div>
@@ -151,9 +151,9 @@ function WelcomeStep() {
               <Shield className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-medium text-foreground">Security Keys</h3>
+              <h3 className="font-medium text-foreground">Chaves de Segurança</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Generate encryption keys for securing your API credentials at rest.
+                Gere chaves de criptografia para proteger suas credenciais de API em repouso.
               </p>
             </div>
           </div>
@@ -165,9 +165,9 @@ function WelcomeStep() {
               <Server className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-medium text-foreground">Server Configuration</h3>
+              <h3 className="font-medium text-foreground">Configuração do Servidor</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Configure CORS, rate limiting, and other server settings.
+                Configure CORS, limite de requisições e outras configurações do servidor.
               </p>
             </div>
           </div>
@@ -178,16 +178,16 @@ function WelcomeStep() {
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-foreground">Before you begin</p>
+            <p className="text-sm font-medium text-foreground">Antes de começar</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Make sure you have a PostgreSQL database ready and accessible from this server.
+              Certifique-se de ter um banco de dados PostgreSQL pronto e acessível a partir deste servidor.
             </p>
           </div>
         </div>
       </div>
 
       <Button onClick={nextStep} size="lg">
-        Start Setup
+        Iniciar Configuração
         <ChevronRight className="w-4 h-4 ml-2" />
       </Button>
     </div>
@@ -231,9 +231,9 @@ function DatabaseStep() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-2xl font-semibold text-foreground mb-2">Database Configuration</h2>
+      <h2 className="text-2xl font-semibold text-foreground mb-2">Configuração do Banco de Dados</h2>
       <p className="text-muted-foreground mb-8">
-        Connect to your PostgreSQL database. API Bridge will create the necessary tables automatically.
+        Conecte ao seu banco de dados PostgreSQL. O API Bridge criará as tabelas necessárias automaticamente.
       </p>
 
       <div className="space-y-6">
@@ -248,7 +248,7 @@ function DatabaseStep() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="port">Port</Label>
+            <Label htmlFor="port">Porta</Label>
             <Input
               id="port"
               type="number"
@@ -259,7 +259,7 @@ function DatabaseStep() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="database">Database Name</Label>
+          <Label htmlFor="database">Nome do Banco</Label>
           <Input
             id="database"
             value={db.database}
@@ -270,7 +270,7 @@ function DatabaseStep() {
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Usuário</Label>
             <Input
               id="username"
               value={db.username}
@@ -279,13 +279,13 @@ function DatabaseStep() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Senha</Label>
             <Input
               id="password"
               type="password"
               value={db.password}
               onChange={(e) => updateDb('password', e.target.value)}
-              placeholder="Enter password"
+              placeholder="Digite a senha"
             />
           </div>
         </div>
@@ -295,11 +295,11 @@ function DatabaseStep() {
             checked={db.ssl}
             onCheckedChange={(checked) => updateDb('ssl', checked)}
           />
-          <Label>Use SSL connection</Label>
+          <Label>Usar conexão SSL</Label>
         </div>
 
         <div className="gradient-card border border-border rounded-lg p-4">
-          <p className="text-xs font-mono text-muted-foreground mb-3">Connection String Preview:</p>
+          <p className="text-xs font-mono text-muted-foreground mb-3">String de Conexão:</p>
           <code className="text-sm text-foreground break-all">
             postgresql://{db.username}:****@{db.host}:{db.port}/{db.database}{db.ssl ? '?sslmode=require' : ''}
           </code>
@@ -314,12 +314,12 @@ function DatabaseStep() {
             {connectionStatus === 'testing' ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Testing...
+                Testando...
               </>
             ) : (
               <>
                 <Database className="w-4 h-4 mr-2" />
-                Test Connection
+                Testar Conexão
               </>
             )}
           </Button>
@@ -327,7 +327,7 @@ function DatabaseStep() {
           {connectionStatus === 'success' && (
             <div className="flex items-center gap-2 text-success text-sm">
               <CheckCircle2 className="w-4 h-4" />
-              Connected successfully
+              Conectado com sucesso
             </div>
           )}
 
@@ -343,8 +343,8 @@ function DatabaseStep() {
           <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/10 border border-primary/20">
             <Loader2 className="w-5 h-5 text-primary animate-spin" />
             <div>
-              <p className="text-sm font-medium text-foreground">Running migrations...</p>
-              <p className="text-xs text-muted-foreground">Creating database tables</p>
+              <p className="text-sm font-medium text-foreground">Executando migrações...</p>
+              <p className="text-xs text-muted-foreground">Criando tabelas do banco de dados</p>
             </div>
           </div>
         )}
@@ -353,8 +353,8 @@ function DatabaseStep() {
           <div className="flex items-center gap-3 p-4 rounded-lg bg-success/10 border border-success/20">
             <CheckCircle2 className="w-5 h-5 text-success" />
             <div>
-              <p className="text-sm font-medium text-foreground">Database ready</p>
-              <p className="text-xs text-muted-foreground">All tables created successfully</p>
+              <p className="text-sm font-medium text-foreground">Banco de dados pronto</p>
+              <p className="text-xs text-muted-foreground">Todas as tabelas foram criadas com sucesso</p>
             </div>
           </div>
         )}
@@ -363,10 +363,10 @@ function DatabaseStep() {
       <div className="flex justify-between mt-8 pt-6 border-t border-border">
         <Button variant="outline" onClick={prevStep}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          Voltar
         </Button>
         <Button onClick={nextStep} disabled={!canProceed}>
-          Continue
+          Continuar
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
@@ -391,48 +391,48 @@ function AdminStep() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-2xl font-semibold text-foreground mb-2">Admin Account</h2>
+      <h2 className="text-2xl font-semibold text-foreground mb-2">Conta de Administrador</h2>
       <p className="text-muted-foreground mb-8">
-        Create the administrator account for accessing the API Bridge panel.
+        Crie a conta de administrador para acessar o painel do API Bridge.
       </p>
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email">Endereço de E-mail</Label>
           <Input
             id="email"
             type="email"
             value={admin.email}
             onChange={(e) => updateAdmin('email', e.target.value)}
-            placeholder="admin@yourcompany.com"
+            placeholder="admin@suaempresa.com"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="adminPassword">Password</Label>
+          <Label htmlFor="adminPassword">Senha</Label>
           <Input
             id="adminPassword"
             type="password"
             value={admin.password}
             onChange={(e) => updateAdmin('password', e.target.value)}
-            placeholder="Minimum 8 characters"
+            placeholder="Mínimo 8 caracteres"
           />
           {admin.password && admin.password.length < 8 && (
-            <p className="text-xs text-destructive">Password must be at least 8 characters</p>
+            <p className="text-xs text-destructive">A senha deve ter pelo menos 8 caracteres</p>
           )}
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Label htmlFor="confirmPassword">Confirmar Senha</Label>
           <Input
             id="confirmPassword"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm your password"
+            placeholder="Confirme sua senha"
           />
           {confirmPassword && admin.password !== confirmPassword && (
-            <p className="text-xs text-destructive">Passwords do not match</p>
+            <p className="text-xs text-destructive">As senhas não coincidem</p>
           )}
         </div>
       </div>
@@ -440,10 +440,10 @@ function AdminStep() {
       <div className="flex justify-between mt-8 pt-6 border-t border-border">
         <Button variant="outline" onClick={prevStep}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          Voltar
         </Button>
         <Button onClick={nextStep} disabled={!isValid}>
-          Continue
+          Continuar
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
@@ -474,18 +474,18 @@ function SecurityStep() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-2xl font-semibold text-foreground mb-2">Security Keys</h2>
+      <h2 className="text-2xl font-semibold text-foreground mb-2">Chaves de Segurança</h2>
       <p className="text-muted-foreground mb-8">
-        These keys are used to encrypt credentials and secure sessions. Keep them safe!
+        Estas chaves são usadas para criptografar credenciais e proteger sessões. Guarde-as em segurança!
       </p>
 
       <div className="p-4 rounded-lg bg-warning/10 border border-warning/20 mb-6">
         <div className="flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-foreground">Important</p>
+            <p className="text-sm font-medium text-foreground">Importante</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Save these keys securely. If you lose the Master Key, encrypted credentials cannot be recovered.
+              Salve estas chaves em local seguro. Se você perder a Chave Mestra, as credenciais criptografadas não poderão ser recuperadas.
             </p>
           </div>
         </div>
@@ -494,60 +494,60 @@ function SecurityStep() {
       <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label>Master Key (AES-256 encryption)</Label>
+            <Label>Chave Mestra (criptografia AES-256)</Label>
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => regenerateKey('masterKey')}
             >
               <RefreshCw className="w-3 h-3 mr-1" />
-              Regenerate
+              Regenerar
             </Button>
           </div>
           <CopyField value={security.masterKey} />
-          <p className="text-xs text-muted-foreground">Used to encrypt API credentials at rest</p>
+          <p className="text-xs text-muted-foreground">Usada para criptografar credenciais de API em repouso</p>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label>JWT Secret</Label>
+            <Label>Segredo JWT</Label>
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => regenerateKey('jwtSecret')}
             >
               <RefreshCw className="w-3 h-3 mr-1" />
-              Regenerate
+              Regenerar
             </Button>
           </div>
           <CopyField value={security.jwtSecret} />
-          <p className="text-xs text-muted-foreground">Used to sign authentication tokens</p>
+          <p className="text-xs text-muted-foreground">Usado para assinar tokens de autenticação</p>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label>Session Secret</Label>
+            <Label>Segredo de Sessão</Label>
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => regenerateKey('sessionSecret')}
             >
               <RefreshCw className="w-3 h-3 mr-1" />
-              Regenerate
+              Regenerar
             </Button>
           </div>
           <CopyField value={security.sessionSecret} />
-          <p className="text-xs text-muted-foreground">Used for secure cookie sessions</p>
+          <p className="text-xs text-muted-foreground">Usado para cookies de sessão seguros</p>
         </div>
       </div>
 
       <div className="flex justify-between mt-8 pt-6 border-t border-border">
         <Button variant="outline" onClick={prevStep}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          Voltar
         </Button>
         <Button onClick={nextStep}>
-          Continue
+          Continuar
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
@@ -584,26 +584,26 @@ function ServerStep() {
 
   return (
     <div className="animate-fade-in">
-      <h2 className="text-2xl font-semibold text-foreground mb-2">Server Configuration</h2>
+      <h2 className="text-2xl font-semibold text-foreground mb-2">Configuração do Servidor</h2>
       <p className="text-muted-foreground mb-8">
-        Configure server settings, CORS, and rate limiting.
+        Configure as opções do servidor, CORS e limite de requisições.
       </p>
 
       <div className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="baseUrl">Public URL (optional)</Label>
+          <Label htmlFor="baseUrl">URL Pública (opcional)</Label>
           <Input
             id="baseUrl"
             value={server.baseUrl}
             onChange={(e) => updateServer('baseUrl', e.target.value)}
-            placeholder="https://api.yourcompany.com"
+            placeholder="https://api.suaempresa.com"
           />
-          <p className="text-xs text-muted-foreground">The public URL where API Bridge is accessible</p>
+          <p className="text-xs text-muted-foreground">A URL pública onde o API Bridge será acessível</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="port">Server Port</Label>
+            <Label htmlFor="port">Porta do Servidor</Label>
             <Input
               id="port"
               type="number"
@@ -612,7 +612,7 @@ function ServerStep() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="rateLimit">Rate Limit (req/min)</Label>
+            <Label htmlFor="rateLimit">Limite de Requisições (req/min)</Label>
             <Input
               id="rateLimit"
               type="number"
@@ -623,26 +623,26 @@ function ServerStep() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="timeout">Upstream Timeout (ms)</Label>
+          <Label htmlFor="timeout">Timeout Upstream (ms)</Label>
           <Input
             id="timeout"
             type="number"
             value={server.upstreamTimeoutMs}
             onChange={(e) => updateServer('upstreamTimeoutMs', parseInt(e.target.value) || 15000)}
           />
-          <p className="text-xs text-muted-foreground">Maximum time to wait for upstream API responses</p>
+          <p className="text-xs text-muted-foreground">Tempo máximo de espera por respostas das APIs upstream</p>
         </div>
 
         <div className="space-y-3">
-          <Label>CORS Allowed Origins</Label>
+          <Label>Origens CORS Permitidas</Label>
           <div className="flex gap-2">
             <Input
               value={originInput}
               onChange={(e) => setOriginInput(e.target.value)}
-              placeholder="https://app.yourcompany.com"
+              placeholder="https://app.suaempresa.com"
               onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOrigin())}
             />
-            <Button variant="outline" onClick={addOrigin}>Add</Button>
+            <Button variant="outline" onClick={addOrigin}>Adicionar</Button>
           </div>
           <div className="flex flex-wrap gap-2">
             {server.corsOrigins.map(origin => (
@@ -663,10 +663,10 @@ function ServerStep() {
       <div className="flex justify-between mt-8 pt-6 border-t border-border">
         <Button variant="outline" onClick={prevStep}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          Voltar
         </Button>
         <Button onClick={nextStep}>
-          Continue
+          Continuar
           <ChevronRight className="w-4 h-4 ml-2" />
         </Button>
       </div>
@@ -677,10 +677,10 @@ function ServerStep() {
 function FinishStep() {
   const { config, prevStep, completeSetup } = useSetupStore();
 
-  const envContent = `# API Bridge Configuration
-# Generated: ${new Date().toISOString()}
+  const envContent = `# Configuração do API Bridge
+# Gerado em: ${new Date().toISOString()}
 
-# Database
+# Banco de Dados
 DATABASE_HOST=${config.database?.host || 'localhost'}
 DATABASE_PORT=${config.database?.port || 5432}
 DATABASE_NAME=${config.database?.database || 'apibridge'}
@@ -688,19 +688,19 @@ DATABASE_USER=${config.database?.username || 'postgres'}
 DATABASE_PASSWORD=${config.database?.password || ''}
 DATABASE_SSL=${config.database?.ssl || false}
 
-# Security (KEEP THESE SECRET!)
+# Segurança (MANTENHA ESTES SEGREDOS!)
 MASTER_KEY=${config.security?.masterKey || ''}
 JWT_SECRET=${config.security?.jwtSecret || ''}
 SESSION_SECRET=${config.security?.sessionSecret || ''}
 
-# Server
+# Servidor
 PORT=${config.server?.port || 3000}
 BASE_URL=${config.server?.baseUrl || ''}
 RATE_LIMIT_PER_MIN=${config.server?.rateLimitPerMin || 60}
 UPSTREAM_TIMEOUT_MS=${config.server?.upstreamTimeoutMs || 15000}
 CORS_ORIGINS=${config.server?.corsOrigins?.join(',') || ''}
 
-# Admin (initial setup only)
+# Admin (apenas configuração inicial)
 ADMIN_EMAIL=${config.admin?.email || ''}
 ADMIN_PASSWORD=${config.admin?.password || ''}
 `;
@@ -712,31 +712,31 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
           <CheckCircle2 className="w-6 h-6 text-success" />
         </div>
         <div>
-          <h2 className="text-2xl font-semibold text-foreground">Setup Complete</h2>
-          <p className="text-muted-foreground">Your API Bridge is ready to use</p>
+          <h2 className="text-2xl font-semibold text-foreground">Configuração Concluída</h2>
+          <p className="text-muted-foreground">Seu API Bridge está pronto para uso</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <div className="gradient-card border border-border rounded-lg p-5">
-          <h3 className="font-medium text-foreground mb-3">Configuration Summary</h3>
+          <h3 className="font-medium text-foreground mb-3">Resumo da Configuração</h3>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Database</dt>
+              <dt className="text-muted-foreground">Banco de Dados</dt>
               <dd className="text-foreground font-mono">
                 {config.database?.host}:{config.database?.port}/{config.database?.database}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Admin Email</dt>
+              <dt className="text-muted-foreground">E-mail do Admin</dt>
               <dd className="text-foreground">{config.admin?.email}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Server Port</dt>
+              <dt className="text-muted-foreground">Porta do Servidor</dt>
               <dd className="text-foreground">{config.server?.port}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-muted-foreground">Rate Limit</dt>
+              <dt className="text-muted-foreground">Limite de Requisições</dt>
               <dd className="text-foreground">{config.server?.rateLimitPerMin} req/min</dd>
             </div>
           </dl>
@@ -744,7 +744,7 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-foreground">Environment Variables</h3>
+            <h3 className="font-medium text-foreground">Variáveis de Ambiente</h3>
             <Button
               variant="outline"
               size="sm"
@@ -753,7 +753,7 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
               }}
             >
               <Copy className="w-3 h-3 mr-1" />
-              Copy .env
+              Copiar .env
             </Button>
           </div>
           <div className="rounded-lg bg-secondary/50 border border-border p-4 max-h-64 overflow-y-auto">
@@ -762,17 +762,17 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
             </pre>
           </div>
           <p className="text-xs text-muted-foreground">
-            Save this as <code className="text-foreground">.env</code> file in your server directory.
+            Salve isso como arquivo <code className="text-foreground">.env</code> no diretório do seu servidor.
           </p>
         </div>
 
         <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
-          <h4 className="font-medium text-foreground mb-2">Next Steps</h4>
+          <h4 className="font-medium text-foreground mb-2">Próximos Passos</h4>
           <ol className="list-decimal list-inside text-sm text-muted-foreground space-y-1">
-            <li>Save the environment variables to your server</li>
-            <li>Start the API Bridge backend service</li>
-            <li>Create your first API connection</li>
-            <li>Generate client tokens for your applications</li>
+            <li>Salve as variáveis de ambiente no seu servidor</li>
+            <li>Inicie o serviço de backend do API Bridge</li>
+            <li>Crie sua primeira conexão de API</li>
+            <li>Gere tokens de cliente para suas aplicações</li>
           </ol>
         </div>
       </div>
@@ -780,11 +780,11 @@ ADMIN_PASSWORD=${config.admin?.password || ''}
       <div className="flex justify-between mt-8 pt-6 border-t border-border">
         <Button variant="outline" onClick={prevStep}>
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Back
+          Voltar
         </Button>
         <Button onClick={completeSetup}>
           <Check className="w-4 h-4 mr-2" />
-          Complete Setup
+          Concluir Configuração
         </Button>
       </div>
     </div>

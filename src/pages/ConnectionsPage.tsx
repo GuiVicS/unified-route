@@ -26,7 +26,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -43,6 +42,7 @@ import {
 import { ConnectionForm } from '@/components/connections/ConnectionForm';
 import type { Connection, ConnectionFormData } from '@/types/api-bridge';
 import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export function ConnectionsPage() {
   const { 
@@ -105,12 +105,12 @@ export function ConnectionsPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Connections" 
-        description="Manage your API provider connections"
+        title="Conexões" 
+        description="Gerencie suas conexões com provedores de API"
         action={
           <Button onClick={() => setIsCreateOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            New Connection
+            Nova Conexão
           </Button>
         }
       />
@@ -121,10 +121,10 @@ export function ConnectionsPage() {
         </div>
       ) : connections.length === 0 ? (
         <div className="text-center py-12 gradient-card border border-border rounded-lg">
-          <p className="text-muted-foreground mb-4">No connections configured yet</p>
+          <p className="text-muted-foreground mb-4">Nenhuma conexão configurada ainda</p>
           <Button onClick={() => setIsCreateOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Create your first connection
+            Criar sua primeira conexão
           </Button>
         </div>
       ) : (
@@ -148,7 +148,7 @@ export function ConnectionsPage() {
                   </div>
                   <p className="text-xs text-muted-foreground font-mono mt-1">{conn.baseUrl}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Updated {formatDistanceToNow(new Date(conn.updatedAt), { addSuffix: true })}
+                    Atualizada {formatDistanceToNow(new Date(conn.updatedAt), { addSuffix: true, locale: ptBR })}
                   </p>
                 </div>
               </div>
@@ -185,7 +185,7 @@ export function ConnectionsPage() {
                   ) : (
                     <>
                       <Play className="w-3 h-3 mr-1" />
-                      Test
+                      Testar
                     </>
                   )}
                 </Button>
@@ -199,11 +199,11 @@ export function ConnectionsPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setEditConnection(conn)}>
                       <Pencil className="w-4 h-4 mr-2" />
-                      Edit
+                      Editar
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => toggleConnection(conn.id)}>
                       <Power className="w-4 h-4 mr-2" />
-                      {conn.enabled ? 'Disable' : 'Enable'}
+                      {conn.enabled ? 'Desativar' : 'Ativar'}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
@@ -211,7 +211,7 @@ export function ConnectionsPage() {
                       onClick={() => setDeleteId(conn.id)}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
+                      Excluir
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -225,9 +225,9 @@ export function ConnectionsPage() {
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>New Connection</DialogTitle>
+            <DialogTitle>Nova Conexão</DialogTitle>
             <DialogDescription>
-              Configure a new API provider connection
+              Configure uma nova conexão com provedor de API
             </DialogDescription>
           </DialogHeader>
           <ConnectionForm onSubmit={handleCreate} onCancel={() => setIsCreateOpen(false)} />
@@ -238,9 +238,9 @@ export function ConnectionsPage() {
       <Dialog open={!!editConnection} onOpenChange={() => setEditConnection(null)}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Connection</DialogTitle>
+            <DialogTitle>Editar Conexão</DialogTitle>
             <DialogDescription>
-              Update connection settings. Leave credentials empty to keep existing.
+              Atualize as configurações da conexão. Deixe as credenciais em branco para manter as existentes.
             </DialogDescription>
           </DialogHeader>
           {editConnection && (
@@ -257,18 +257,18 @@ export function ConnectionsPage() {
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Connection</AlertDialogTitle>
+            <AlertDialogTitle>Excluir Conexão</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. All clients using this connection will fail.
+              Esta ação não pode ser desfeita. Todos os clientes usando esta conexão irão falhar.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleDelete}
             >
-              Delete
+              Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

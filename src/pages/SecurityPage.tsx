@@ -48,7 +48,7 @@ export function SecurityPage() {
       enableAuditLogs,
     });
     setIsSaving(false);
-    toast.success('Security settings updated');
+    toast.success('Configurações de segurança atualizadas');
   };
 
   if (isLoading) {
@@ -64,8 +64,8 @@ export function SecurityPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Security Settings" 
-        description="Configure global security policies"
+        title="Configurações de Segurança" 
+        description="Configure políticas de segurança globais"
         action={
           <Button onClick={handleSave} disabled={isSaving}>
             {isSaving ? (
@@ -73,7 +73,7 @@ export function SecurityPage() {
             ) : (
               <Save className="w-4 h-4 mr-2" />
             )}
-            Save Changes
+            Salvar Alterações
           </Button>
         }
       />
@@ -86,8 +86,8 @@ export function SecurityPage() {
               <Globe className="w-5 h-5 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="text-base font-medium text-foreground">CORS Allowed Origins</h3>
-              <p className="text-sm text-muted-foreground">Origins allowed to make requests</p>
+              <h3 className="text-base font-medium text-foreground">Origens CORS Permitidas</h3>
+              <p className="text-sm text-muted-foreground">Origens autorizadas a fazer requisições</p>
             </div>
           </div>
 
@@ -96,7 +96,7 @@ export function SecurityPage() {
               <Input
                 value={newOrigin}
                 onChange={(e) => setNewOrigin(e.target.value)}
-                placeholder="https://example.com or https://*.example.com"
+                placeholder="https://exemplo.com ou https://*.exemplo.com"
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addOrigin())}
               />
               <Button variant="outline" onClick={addOrigin}>
@@ -117,7 +117,7 @@ export function SecurityPage() {
                 </Badge>
               ))}
               {allowedOrigins.length === 0 && (
-                <p className="text-sm text-muted-foreground">No origins configured (all blocked by default)</p>
+                <p className="text-sm text-muted-foreground">Nenhuma origem configurada (todas bloqueadas por padrão)</p>
               )}
             </div>
           </div>
@@ -130,13 +130,13 @@ export function SecurityPage() {
               <Gauge className="w-5 h-5 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="text-base font-medium text-foreground">Rate Limiting</h3>
-              <p className="text-sm text-muted-foreground">Limit requests per token/IP</p>
+              <h3 className="text-base font-medium text-foreground">Limite de Requisições</h3>
+              <p className="text-sm text-muted-foreground">Limite de requisições por token/IP</p>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="rateLimit">Requests per minute</Label>
+            <Label htmlFor="rateLimit">Requisições por minuto</Label>
             <div className="flex items-center gap-4">
               <Input
                 id="rateLimit"
@@ -147,7 +147,7 @@ export function SecurityPage() {
                 onChange={(e) => setRateLimit(parseInt(e.target.value) || 60)}
                 className="w-32"
               />
-              <span className="text-sm text-muted-foreground">req/min per token or IP</span>
+              <span className="text-sm text-muted-foreground">req/min por token ou IP</span>
             </div>
           </div>
         </div>
@@ -160,8 +160,8 @@ export function SecurityPage() {
                 <FileText className="w-5 h-5 text-muted-foreground" />
               </div>
               <div>
-                <h3 className="text-base font-medium text-foreground">Audit Logging</h3>
-                <p className="text-sm text-muted-foreground">Log all proxy requests for debugging</p>
+                <h3 className="text-base font-medium text-foreground">Logs de Auditoria</h3>
+                <p className="text-sm text-muted-foreground">Registrar todas as requisições de proxy para depuração</p>
               </div>
             </div>
             <Switch
@@ -178,31 +178,31 @@ export function SecurityPage() {
               <Shield className="w-5 h-5 text-success" />
             </div>
             <div>
-              <h3 className="text-base font-medium text-foreground">Security Features</h3>
-              <p className="text-sm text-muted-foreground">Built-in protections</p>
+              <h3 className="text-base font-medium text-foreground">Recursos de Segurança</h3>
+              <p className="text-sm text-muted-foreground">Proteções integradas</p>
             </div>
           </div>
 
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-success" />
-              AES-256-GCM encryption for credentials at rest
+              Criptografia AES-256-GCM para credenciais em repouso
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-success" />
-              HttpOnly cookies with CSRF protection
+              Cookies HttpOnly com proteção CSRF
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-success" />
-              Path traversal and SSRF protection
+              Proteção contra path traversal e SSRF
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-success" />
-              Argon2 hashing for client tokens
+              Hash Argon2 para tokens de cliente
             </li>
             <li className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-success" />
-              Helmet security headers
+              Headers de segurança Helmet
             </li>
           </ul>
         </div>

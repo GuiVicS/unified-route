@@ -67,12 +67,12 @@ export function CopyField({ label, value, masked = false }: CopyFieldProps) {
           {copied ? (
             <>
               <Check className="w-3 h-3 text-success mr-1" />
-              Copied
+              Copiado
             </>
           ) : (
             <>
               <Copy className="w-3 h-3 mr-1" />
-              Copy
+              Copiar
             </>
           )}
         </Button>

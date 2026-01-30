@@ -54,12 +54,12 @@ export function ClientForm({ initialData, connections, onSubmit, onCancel }: Cli
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="name">Client Name</Label>
+        <Label htmlFor="name">Nome do Cliente</Label>
         <Input
           id="name"
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-          placeholder="e.g., Mobile App, Support Panel"
+          placeholder="ex: App Mobile, Painel de Suporte"
           required
         />
       </div>
@@ -69,30 +69,30 @@ export function ClientForm({ initialData, connections, onSubmit, onCancel }: Cli
           checked={formData.enabled}
           onCheckedChange={(checked) => setFormData(prev => ({ ...prev, enabled: checked }))}
         />
-        <Label>Enabled</Label>
+        <Label>Ativado</Label>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="origins">Allowed Origins (Optional)</Label>
+        <Label htmlFor="origins">Origens Permitidas (Opcional)</Label>
         <Input
           id="origins"
           value={originsInput}
           onChange={(e) => setOriginsInput(e.target.value)}
-          placeholder="https://app.example.com, https://*.example.com"
+          placeholder="https://app.exemplo.com, https://*.exemplo.com"
         />
         <p className="text-xs text-muted-foreground">
-          Comma-separated list. Leave empty to allow all origins.
+          Lista separada por vírgula. Deixe em branco para permitir todas as origens.
         </p>
       </div>
 
       <div className="space-y-3">
-        <Label>Allowed Connections (Optional)</Label>
+        <Label>Conexões Permitidas (Opcional)</Label>
         <p className="text-xs text-muted-foreground">
-          Leave unchecked to allow all connections
+          Deixe desmarcado para permitir todas as conexões
         </p>
         <div className="space-y-2 p-3 rounded-lg bg-secondary/30 border border-border max-h-48 overflow-y-auto">
           {connections.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No connections available</p>
+            <p className="text-sm text-muted-foreground">Nenhuma conexão disponível</p>
           ) : (
             connections.map(conn => (
               <div key={conn.id} className="flex items-center gap-3">
@@ -116,11 +116,11 @@ export function ClientForm({ initialData, connections, onSubmit, onCancel }: Cli
 
       <div className="flex justify-end gap-3 pt-4 border-t border-border">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          Cancelar
         </Button>
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-          {initialData ? 'Update Client' : 'Create Client'}
+          {initialData ? 'Atualizar Cliente' : 'Criar Cliente'}
         </Button>
       </div>
     </form>
