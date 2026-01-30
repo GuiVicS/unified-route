@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Client, ClientFormData, ClientWithToken } from '@/types/api-bridge';
+import { schedulSync } from '@/lib/api-service';
 
 const generateToken = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -13,8 +14,13 @@ const generateToken = () => {
   return token;
 };
 
+// Interface estendida para armazenar o token
+interface ClientWithStoredToken extends Client {
+  token?: string;
+}
+
 interface ClientStore {
-  clients: Client[];
+  clients: ClientWithStoredToken[];
   isLoading: boolean;
   error: string | null;
   fetchClients: () => Promise<void>;
@@ -40,61 +46,77 @@ export const useClientStore = create<ClientStore>()(
 
       createClient: async (data: ClientFormData) => {
         const token = generateToken();
-        const newClient: ClientWithToken = {
+        const newClient: ClientWithStoredToken = {
           id: `client-${Date.now()}`,
           name: data.name,
           allowedOrigins: data.allowedOrigins,
           allowedConnectionIds: data.allowedConnectionIds,
           enabled: data.enabled,
           createdAt: new Date().toISOString(),
-          token,
+          token, // Armazenar o token para sincronização
         };
         
-        set(state => ({ 
-          clients: [...state.clients, { ...newClient, token: undefined } as Client] 
-        }));
+        set(state => {
+          const clients = [...state.clients, newClient];
+          // Sincronizar com backend (incluindo o token)
+          schedulSync({ clients });
+          return { clients };
+        });
         
-        return newClient;
+        // Retornar com token visível
+        return { ...newClient, token } as ClientWithToken;
       },
 
       updateClient: async (id: string, data: Partial<ClientFormData>) => {
-        let updated: Client | undefined;
+        let updated: ClientWithStoredToken | undefined;
         
-        set(state => ({
-          clients: state.clients.map(client => {
+        set(state => {
+          const clients = state.clients.map(client => {
             if (client.id === id) {
               updated = { ...client, ...data };
               return updated;
             }
             return client;
-          }),
-        }));
+          });
+          // Sincronizar com backend
+          schedulSync({ clients });
+          return { clients };
+        });
         
         if (!updated) throw new Error('Client not found');
         return updated;
       },
 
       deleteClient: async (id: string) => {
-        set(state => ({
-          clients: state.clients.filter(client => client.id !== id),
-        }));
+        set(state => {
+          const clients = state.clients.filter(client => client.id !== id);
+          // Sincronizar com backend
+          schedulSync({ clients });
+          return { clients };
+        });
       },
 
       toggleClient: async (id: string) => {
-        set(state => ({
-          clients: state.clients.map(client =>
+        set(state => {
+          const clients = state.clients.map(client =>
             client.id === id ? { ...client, enabled: !client.enabled } : client
-          ),
-        }));
+          );
+          // Sincronizar com backend
+          schedulSync({ clients });
+          return { clients };
+        });
       },
 
       regenerateToken: async (id: string) => {
         const newToken = generateToken();
-        set(state => ({
-          clients: state.clients.map(client =>
+        set(state => {
+          const clients = state.clients.map(client =>
             client.id === id ? { ...client, token: newToken } : client
-          ),
-        }));
+          );
+          // Sincronizar com backend (incluindo novo token)
+          schedulSync({ clients });
+          return { clients };
+        });
         return newToken;
       },
     }),
