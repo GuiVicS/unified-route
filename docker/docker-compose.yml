@@ -1,5 +1,7 @@
+# ===========================================
 # API Bridge - Docker Compose
-# Arquivo de orquestração para deploy rápido
+# Orquestração completa para produção
+# ===========================================
 
 version: '3.8'
 
@@ -15,8 +17,10 @@ services:
       POSTGRES_USER: ${DATABASE_USER:-apibridge}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-apibridge123}
       POSTGRES_DB: ${DATABASE_NAME:-apibridge}
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
       - "${DATABASE_PORT:-5432}:5432"
     healthcheck:
@@ -24,6 +28,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    networks:
+      - apibridge-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # ==============================
   # API Bridge Application
@@ -32,6 +44,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    image: apibridge:latest
     container_name: apibridge-app
     restart: unless-stopped
     depends_on:
@@ -49,11 +62,12 @@ services:
       DATABASE_SSL: "false"
       
       # Segurança (OBRIGATÓRIO ALTERAR EM PRODUÇÃO)
-      MASTER_KEY: ${MASTER_KEY:-ALTERE_ESTA_CHAVE_32_CARACTERES}
-      JWT_SECRET: ${JWT_SECRET:-ALTERE_ESTE_SEGREDO_JWT_64_CHARS_MUITO_IMPORTANTE_SEGURO}
-      SESSION_SECRET: ${SESSION_SECRET:-ALTERE_ESTE_SEGREDO_SESSAO_32CH}
+      MASTER_KEY: ${MASTER_KEY:-ALTERE_ESTA_CHAVE_32_CARACTERES!}
+      JWT_SECRET: ${JWT_SECRET:-ALTERE_ESTE_SEGREDO_JWT_64_CHARS_MUITO_IMPORTANTE_SEGURO!}
+      SESSION_SECRET: ${SESSION_SECRET:-ALTERE_ESTE_SEGREDO_SESSAO_32CH!}
       
       # Servidor
+      NODE_ENV: production
       PORT: 3000
       BASE_URL: ${BASE_URL:-http://localhost:3000}
       RATE_LIMIT_PER_MIN: ${RATE_LIMIT_PER_MIN:-60}
@@ -63,20 +77,44 @@ services:
       # Admin (configuração inicial)
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@apibridge.local}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      
+      # Timezone
+      TZ: ${TZ:-America/Sao_Paulo}
     volumes:
       - app_data:/app/data
+      - app_logs:/app/logs
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
+    networks:
+      - apibridge-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
+# ==============================
+# Volumes Persistentes
+# ==============================
 volumes:
   postgres_data:
     driver: local
+    name: apibridge-postgres-data
   app_data:
     driver: local
+    name: apibridge-app-data
+  app_logs:
+    driver: local
+    name: apibridge-logs
 
+# ==============================
+# Rede
+# ==============================
 networks:
-  default:
+  apibridge-network:
+    driver: bridge
     name: apibridge-network
